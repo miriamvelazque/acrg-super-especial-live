@@ -4,17 +4,21 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Rally Fueguino - Live Timing</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,700;1,800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;1,700;1,800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 :root{--bg:#0B0B0B;--panel:#141417;--line:#2a2a31;--cy:#00E5D9;--vi:#8A2BE2;--tx:#fff;--mu:#b4b4bd;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{background:var(--bg);color:var(--tx);font-family:Barlow,system-ui,sans-serif;margin:0}
-.sp{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-style:italic;font-weight:800;letter-spacing:.01em}
+.sp{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-style:normal;font-weight:800;letter-spacing:.01em}
+.it{font-style:italic}
 .hero{background:linear-gradient(100deg,#0B0B0B 30%,#2a0f4a 100%);border-bottom:3px solid var(--cy)}
-.chip{border:1px solid var(--line);color:var(--mu);padding:.35rem .8rem;border-radius:999px;font-weight:600;cursor:pointer;background:transparent}
-.chip[aria-pressed=true]{background:var(--cy);color:#001514;border-color:var(--cy)}
-.tab{padding:.7rem 1.1rem;font-size:1.25rem;color:var(--mu);border-bottom:4px solid transparent;background:none;cursor:pointer}
+/* Filtro de categoria: mismo estilo que la etiqueta junto al nombre, pero invertido. Sin elegir = relleno con letra negra; elegido = solo borde. */
+.chip{font-family:'Barlow Condensed','Arial Narrow',sans-serif;background:var(--cy);color:#001514;border:1.5px solid var(--cy);padding:.15rem .8rem;border-radius:.3rem;font-weight:800;font-style:italic;cursor:pointer;line-height:1.35}
+.chip[aria-pressed=true]{background:transparent;color:var(--cy);box-shadow:0 0 0 3px rgba(0,229,217,.28)}
+.tabs{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}
+.tab{padding:.6rem 1.3rem;font-size:2rem;line-height:1.1;color:var(--mu);border-bottom:5px solid transparent;background:none;cursor:pointer;white-space:nowrap;flex:none}
+.tab:hover{color:#fff}
 .tab[aria-selected=true]{color:#fff;border-color:var(--vi)}
 :focus-visible{outline:2px solid var(--cy);outline-offset:2px}
 table{border-collapse:separate;border-spacing:0;width:100%}
@@ -26,6 +30,20 @@ tr:hover td{background:#17171b} tr:hover td.stick{background:#17171b}
 .best{color:var(--cy);font-weight:600}
 .num{display:inline-block;min-width:3.1rem;text-align:center;background:var(--vi);padding:.1rem .4rem;border-radius:.3rem;font-size:1.4rem;line-height:1.3}
 .cat{font-size:.75rem;border:1px solid var(--cy);color:var(--cy);border-radius:.3rem;padding:0 .35rem;font-weight:600}
+.cat-lg{display:inline-block;font-size:1.3rem;border:1.5px solid var(--cy);color:var(--cy);border-radius:.3rem;padding:0 .6rem;line-height:1.35;font-style:italic;font-weight:800;margin-left:.5rem;vertical-align:middle}
+.logo{height:5.2rem;width:auto;max-width:100%;display:block}
+.sp-top{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;justify-content:flex-end}
+.sp-top img{height:3.1rem;width:auto;max-width:9rem;object-fit:contain;display:block}
+.sp-top a{display:inline-flex;align-items:center}
+#sponsors{max-width:1600px;margin:2.5rem auto 0;padding:0 1rem}
+#sponsors h2{text-align:center;text-transform:uppercase;font-size:1.6rem;margin:0 0 1rem;color:var(--mu)}
+.sp-grp{display:flex;flex-wrap:wrap;gap:1rem 1.5rem;align-items:center;justify-content:center;margin-bottom:1.1rem}
+.sp-box{display:flex;align-items:center;justify-content:center;border-radius:.5rem}
+.sp-box img{display:block;object-fit:contain;max-width:100%}
+.sp-box.l img{height:7rem}.sp-box.m img{height:5rem}.sp-box.s img{height:3.4rem}
+.sp-box.empty{border:1px dashed #44444d;color:var(--mu);font-size:.85rem;text-align:center}
+.sp-box.empty.l{width:14rem;height:7rem}.sp-box.empty.m{width:10rem;height:5rem}.sp-box.empty.s{width:7rem;height:3.4rem;font-size:.75rem}
+.sp-box.txt{color:#fff;font-weight:600;padding:0 1rem}
 .pos1 .pos{color:var(--cy)}
 .dot{width:.6rem;height:.6rem;border-radius:50%;background:var(--cy);box-shadow:0 0 0 0 var(--cy);animation:pl 2s infinite}
 @keyframes pl{70%{box-shadow:0 0 0 .6rem transparent}100%{box-shadow:0 0 0 0 transparent}}
@@ -34,31 +52,29 @@ tr:hover td{background:#17171b} tr:hover td.stick{background:#17171b}
 td,th{padding:.5rem .45rem}td{font-size:.95rem}.tot{font-size:1.2rem}
 @media(max-width:1399px){td,th{padding:.45rem .35rem}td{font-size:.88rem}.stick{min-width:12.5rem}.tot{font-size:1.1rem}.num{min-width:2.6rem;font-size:1.2rem}.pos{font-size:1.6rem!important}}
 @media(max-width:1199px){td,th{padding:.4rem .25rem}td{font-size:.8rem}th{font-size:.72rem}.stick{min-width:11rem}.tot{font-size:1rem}.cat{display:none}}
+@media(max-width:767px){.tab{font-size:1.45rem;padding:.5rem .9rem}.logo{height:4rem}.sp-top{justify-content:center}.sp-top img{height:2.4rem;max-width:7rem}.sp-box.l img{height:5.5rem}.sp-box.m img{height:4rem}.sp-box.empty.l{width:11rem;height:5.5rem}.sp-box.empty.m{width:8rem;height:4rem}}
 </style>
 </head>
 <body>
 <header class="hero">
-  <div class="max-w-[1600px] mx-auto px-4 py-5 flex flex-wrap items-center gap-4 justify-between">
-    <div class="flex items-center gap-4">
-      <svg width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Logo Rally Fueguino"><defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#00E5D9"/><stop offset="1" stop-color="#8A2BE2"/></linearGradient></defs><path d="M8 52 32 6l24 46-24-10z" fill="url(#g)"/><path d="M32 18l11 21-11-5-11 5z" fill="#0B0B0B"/></svg>
-      <div>
-        <h1 class="sp text-4xl md:text-5xl uppercase leading-none m-0">Rally Fueguino</h1>
-        <p id="evmeta" class="m-0 mt-1" style="color:var(--cy)">A.PI.TU.R.</p>
-        <p id="evname" class="m-0 text-sm" style="color:var(--mu)">Cargando evento…</p>
-      </div>
+  <div class="max-w-[1600px] mx-auto px-4 py-4 grid gap-4 items-center md:grid-cols-[auto_1fr_auto]">
+    <div class="flex justify-center md:justify-start"><img class="logo" src="assets/logo-rally-fueguino.png" alt="Rally Fueguino A.PI.TU.R." width="640" height="179"></div>
+    <div class="text-center">
+      <h1 id="evname" class="sp text-3xl md:text-5xl uppercase leading-none m-0">Cargando evento…</h1>
+      <p id="evmeta" class="m-0 mt-2 text-lg" style="color:var(--cy)">A.PI.TU.R.</p>
     </div>
-    <div class="flex flex-wrap gap-2" aria-label="Sponsors oficiales">
-      <span class="slot">YPF Autosur</span><span class="slot">BGH</span><span class="slot">RGA</span><span class="slot">Tolhuin</span>
-    </div>
+    <div id="sp-top" class="sp-top" aria-label="Sponsors oficiales"></div>
   </div>
 </header>
 
 <main class="max-w-[1600px] mx-auto px-4 py-5">
   <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
-    <div role="tablist" class="flex sp uppercase" aria-label="Vista">
+    <div role="tablist" class="tabs sp uppercase" aria-label="Vista">
       <button class="tab sp" role="tab" data-v="gen" aria-selected="true">General</button>
       <button class="tab sp" role="tab" data-v="cat" aria-selected="false">Por categoría</button>
+      <button class="tab sp" role="tab" data-v="e1" aria-selected="false">Etapa 1</button>
       <button class="tab sp" role="tab" data-v="e2" aria-selected="false">Etapa 2</button>
+      <button class="tab sp" role="tab" data-v="insc" aria-selected="false">Inscriptos</button>
     </div>
     <div class="flex items-center gap-2 text-sm" style="color:var(--mu)" aria-live="polite">
       <span class="dot"></span><span>En vivo · actualizado <b id="upd" class="text-white">--:--:--</b></span>
@@ -67,9 +83,12 @@ td,th{padding:.5rem .45rem}td{font-size:.95rem}.tot{font-size:1.2rem}
   <div id="chips" class="flex flex-wrap gap-2 mb-4" aria-label="Filtro por categoría"></div>
   <p id="note" class="text-sm mb-3" style="color:var(--mu)"></p>
   <div class="overflow-x-auto rounded-lg" style="border:1px solid var(--line)"><table id="tbl"></table></div>
-  <p class="text-xs mt-3" style="color:var(--mu)">Solo se muestran tiempos netos de cada PE. Un DNF o abandono queda fuera del ordenamiento y no suma como tiempo.</p>
+  <p id="foot" class="text-xs mt-3" style="color:var(--mu)">Solo se muestran tiempos netos de cada PE. Un DNF o abandono queda fuera del ordenamiento y no suma como tiempo.</p>
 </main>
 
+<section id="sponsors" aria-label="Sponsors"></section>
+
+<script src="sponsors.js"></script>
 <script src="footer.js"></script>
 <script type="module">
 import { state, startLive, toRows, liveEvent } from './03_public-live-timing.js';
@@ -77,42 +96,58 @@ import { rank, isN } from './ranking.js';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
 const f = x => { const h = Math.floor(x / 360000), m = Math.floor(x / 6000) % 60, s = Math.floor(x / 100) % 60, c = x % 100; const p = v => String(v).padStart(2, '0'); return (h ? h + ':' + p(m) : m) + ':' + p(s) + '.' + p(c) };
-let view = 'gen', cat = 'all', PES = [], ROWS = [], CATS = [];
+let view = 'gen', cat = 'all', PES = [], ROWS = [], CATS = [], CREWS = [];
 
 function body(list, a, b) {
   const best = []; for (let i = a; i < b; i++) best[i] = Math.min(...list.map(x => x.c.t[i]).filter(isN));
   return list.map(x => { const c = x.c; return `<tr class="${x.pos === 1 ? 'pos1' : ''}" style="${x.part || x.pos === '-' ? 'opacity:.75' : ''}">
-  <td class="stick"><div class="flex items-center gap-3"><span class="sp pos ${isN(x.pos) ? 'text-3xl' : 'text-lg'} w-9 text-center">${x.pos}</span><span class="sp num">${c.n}</span>
+  <td class="stick"><div class="flex items-center gap-3"><span class="sp it pos ${isN(x.pos) ? 'text-3xl' : 'text-lg'} w-9 text-center">${x.pos}</span><span class="sp it num">${c.n}</span>
   <div class="leading-tight"><div class="font-semibold">${esc(c.p)} <span class="cat">${esc(c.cat)}</span></div><div class="text-sm" style="color:var(--mu)">${esc(c.nv)}${c.pe ? ' · ' + esc(c.pe) : ''}</div></div></div></td>
   ${c.t.slice(a, b).map((v, i) => v === 'DNF' ? '<td style="color:#ff6b81">DNF</td>' : v === undefined ? '<td style="color:#55555e">·</td>' : `<td class="${v === best[a + i] ? 'best' : ''}">${f(v)}${c.pen[a + i] ? '<sup style="color:#ff9f43"> +' + f(c.pen[a + i]) + '</sup>' : ''}</td>`).join('')}
-  <td class="sp tot">${x.tot == null ? (x.dnf ? '<span style="color:#ff6b81">DNF</span>' : '--') : f(x.tot) + (x.part ? `<sub class="text-xs" style="color:var(--mu)"> ${x.done}/${x.K} PE</sub>` : '')}</td>
+  <td class="sp it tot">${x.tot == null ? (x.dnf ? '<span style="color:#ff6b81">DNF</span>' : '--') : f(x.tot) + (x.part ? `<sub class="text-xs" style="color:var(--mu)"> ${x.done}/${x.K} PE</sub>` : '')}</td>
   <td style="color:var(--mu)">${x.gap > 0 ? '+' + f(x.gap) : x.gap === 0 ? '-' : ''}</td></tr>` }).join('');
 }
 
+function inscriptos() {
+  const list = CREWS.filter(c => cat === 'all' || c.category === cat).sort((p, q) => p.car_number - q.car_number);
+  const hasModel = CREWS.some(c => c.car_model);
+  $('#note').textContent = `${list.length} ${list.length === 1 ? 'tripulación inscripta' : 'tripulaciones inscriptas'}${cat === 'all' ? '' : ' en la categoría ' + cat}.`;
+  if (!list.length) { $('#tbl').innerHTML = '<tbody><tr><td style="text-align:left">Todavía no hay tripulaciones cargadas para este evento.</td></tr></tbody>'; return }
+  const L = 'style="text-align:left"';
+  $('#tbl').innerHTML = `<thead><tr><th ${L}>Auto</th><th ${L}>Piloto</th><th ${L}>Navegante</th><th ${L}>Categoría</th>${hasModel ? `<th ${L}>Vehículo</th>` : ''}<th ${L}>Peña / Equipo</th></tr></thead><tbody>${list.map(c => `<tr>
+    <td ${L}><span class="sp it num">${esc(c.car_number)}</span></td><td ${L} class="font-semibold">${esc(c.driver)}</td><td ${L}>${esc(c.co_driver)}</td>
+    <td ${L}><span class="cat" style="display:inline-block;font-size:.9rem;font-style:italic;font-weight:800">${esc(c.category)}</span></td>${hasModel ? `<td ${L}>${esc(c.car_model)}</td>` : ''}<td ${L} style="color:var(--mu)">${esc(c.team)}</td></tr>`).join('')}</tbody>`;
+}
+
 function render() {
+  $('#foot').hidden = view === 'insc';
+  if (view === 'insc') { inscriptos(); return }
   if (!ROWS.length) { $('#tbl').innerHTML = '<tbody><tr><td style="text-align:left">Todavía no hay tripulaciones cargadas para este evento.</td></tr></tbody>'; return }
   const n = PES.length, s2 = PES.findIndex(p => p.stages?.number === 2);
-  const [a, b] = view === 'e2' && s2 >= 0 ? [s2, n] : [0, n];
+  const [a, b] = view === 'e2' && s2 >= 0 ? [s2, n] : view === 'e1' ? [0, s2 > 0 ? s2 : n] : [0, n];
   const rows = ROWS.filter(c => cat === 'all' || c.cat === cat);
-  let html = `<thead><tr><th class="stick">Pos / Auto / Tripulación</th>${PES.slice(a, b).map(p => `<th>${esc(p.name)}</th>`).join('')}<th>${view === 'e2' ? 'Etapa 2' : 'Acumulado'}</th><th>Diferencia</th></tr></thead>`;
+  const lastCol = view === 'e1' ? 'Etapa 1' : view === 'e2' ? 'Etapa 2' : 'Acumulado';
+  let html = `<thead><tr><th class="stick">Pos / Auto / Tripulación</th>${PES.slice(a, b).map(p => `<th>${esc(p.name)}</th>`).join('')}<th>${lastCol}</th><th>Diferencia</th></tr></thead>`;
   const cols = b - a + 3;
   if (view === 'cat') CATS.filter(k => cat === 'all' || k === cat).forEach(k => {
-    html += `<tbody><tr><td colspan="${cols}" class="sp text-2xl" style="background:#1b1030;text-align:left;border-left:4px solid var(--vi)">Categoría ${esc(k)}</td></tr>${body(rank(rows.filter(c => c.cat === k), a, b), a, b)}</tbody>`;
+    html += `<tbody><tr><td colspan="${cols}" class="sp text-2xl" style="background:#1b1030;text-align:left;border-left:4px solid var(--vi)">Categoría <span class="cat-lg">${esc(k)}</span></td></tr>${body(rank(rows.filter(c => c.cat === k), a, b), a, b)}</tbody>`;
   }); else html += `<tbody>${body(rank(rows, a, b), a, b)}</tbody>`;
   $('#tbl').innerHTML = html;
   $('#note').textContent = view === 'e2' && s2 < 0 ? 'Esta fecha todavía no tiene Etapa 2 cargada.' :
+    view === 'e1' && s2 === 0 ? 'Esta fecha todavía no tiene Etapa 1 cargada.' :
     { gen: `Acumulado de las PE corridas hasta ahora (PE${a + 1} a PE${b}). Quien tiene menos PE completadas va debajo, atenuado.`,
       cat: 'Posiciones dentro de cada categoría. La diferencia es contra el líder de la categoría.',
+      e1: 'Etapa 1 independiente: suma solo de sus PE.',
       e2: 'Etapa 2 independiente: suma solo de sus PE.' }[view];
 }
 function chips() {
-  $('#chips').innerHTML = ['all', ...CATS].map(k => `<button class="chip sp text-lg" data-c="${esc(k)}" aria-pressed="${k === cat}">${k === 'all' ? 'Todas' : esc(k)}</button>`).join('');
+  $('#chips').innerHTML = ['all', ...CATS].map(k => `<button class="chip text-lg" data-c="${esc(k)}" aria-pressed="${k === cat}">${k === 'all' ? 'Todas' : esc(k)}</button>`).join('');
 }
 $('#chips').onclick = e => { const b = e.target.closest('[data-c]'); if (!b) return; cat = b.dataset.c; chips(); render() };
 document.querySelector('[role=tablist]').onclick = e => { const b = e.target.closest('[data-v]'); if (!b) return; view = b.dataset.v; document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', x === b)); render() };
 
 function onData(st) {
-  PES = st.stages; ROWS = toRows(st);
+  PES = st.stages; ROWS = toRows(st); CREWS = [...st.crews.values()];
   const cs = [...new Set(ROWS.map(r => r.cat))].sort();
   if (cs.join() !== CATS.join()) { CATS = cs; chips() }
   $('#upd').textContent = new Date().toLocaleTimeString('es-AR', { hour12: false });
@@ -132,6 +167,22 @@ function header(ev) {
   $('#evname').textContent = ev.name;
   document.title = `${ev.name} - Rally Fueguino Live Timing`;
 }
+// Sponsors: se leen de sponsors.js (arriba y abajo).
+function sponsors() {
+  const S = window.SPONSORS || {};
+  const link = (x, inner) => x.url ? `<a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(x.name)}">${inner}</a>` : inner;
+  $('#sp-top').innerHTML = (S.top || []).slice(0, 4).map(x => link(x, x.logo
+    ? `<img src="${esc(x.logo)}" alt="${esc(x.name)}" loading="lazy">` : `<span class="slot">${esc(x.name)}</span>`)).join('');
+  const groups = ['l', 'm', 's'].map(k => {
+    const real = (S.bottom || []).filter(x => (x.size || 'm') === k);
+    const empty = S.showPlaceholders ? Math.max(0, (S.slots?.[k] || 0) - real.length) : 0;
+    const boxes = real.map(x => link(x, x.logo ? `<span class="sp-box ${k}"><img src="${esc(x.logo)}" alt="${esc(x.name)}" loading="lazy"></span>` : `<span class="sp-box ${k} txt">${esc(x.name)}</span>`))
+      .concat(Array.from({ length: empty }, () => `<span class="sp-box empty ${k}">Tu marca acá</span>`));
+    return boxes.length ? `<div class="sp-grp">${boxes.join('')}</div>` : '';
+  }).join('');
+  $('#sponsors').innerHTML = groups ? `<h2 class="sp">${esc(S.bottomTitle || 'Sponsors')}</h2>${groups}` : '';
+}
+sponsors();
 chips();
 try {
   const ev = await liveEvent();

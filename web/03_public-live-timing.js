@@ -34,9 +34,10 @@ export function startLive(eventId, onUpdate) {
       { event: ev, schema: 'public', table: 'results', filter: `event_id=eq.${eventId}` },
       p => { state.results.set(key(p.new), p.new); notify(); });
   }
-  // Los DELETE no admiten filtro: se filtra aca (la fila completa llega por REPLICA IDENTITY FULL).
+  // Los DELETE no admiten filtro. Con RLS activa, p.old trae solo la clave primaria (special_stage_id y crew_id),
+  // sin event_id: se borra por esa clave (si la fila es de otro evento, simplemente no esta en el mapa).
   channel.on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'results' },
-    p => { if (p.old.event_id === eventId) { state.results.delete(key(p.old)); notify(); } });
+    p => { state.results.delete(key(p.old)); notify(); });
 
   channel.subscribe(status => {
     if (status === 'SUBSCRIBED') { clearInterval(poll); refresh(); }   // tambien resincroniza tras reconectar
