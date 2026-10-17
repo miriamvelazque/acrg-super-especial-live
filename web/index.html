@@ -45,6 +45,19 @@ tr:hover td{background:#17171b} tr:hover td.stick{background:#17171b}
 .sp-box.empty.l{width:14rem;height:7rem}.sp-box.empty.m{width:10rem;height:5rem}.sp-box.empty.s{width:7rem;height:3.4rem;font-size:.75rem}
 .sp-box.txt{color:#fff;font-weight:600;padding:0 1rem}
 .pos1 .pos{color:var(--cy)}
+th.c{text-align:center}
+[hidden]{display:none!important}
+/* Clasificacion final: tarjetas por categoria */
+.fgrid{display:grid;gap:1rem;grid-template-columns:1fr}
+@media(min-width:768px){.fgrid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1280px){.fgrid{grid-template-columns:repeat(3,1fr)}}
+.fc{background:var(--panel);border:1px solid var(--line);border-radius:.7rem;overflow:hidden}
+.fc-h{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.65rem 1rem;background:linear-gradient(100deg,#1b1030,#2a0f4a);border-bottom:2px solid var(--cy)}
+.fc-st{font-size:.72rem;border:1px solid var(--cy);color:var(--cy);border-radius:.3rem;padding:.1rem .5rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.fc-st.prov{border-color:#ff9f43;color:#ff9f43}
+.fc-r{display:grid;grid-template-columns:auto 1fr auto;gap:.8rem;align-items:center;padding:.75rem 1rem;border-top:1px solid var(--line)}
+.fc-h + .fc-r{border-top:0}
+.fc-e{padding:1rem;color:var(--mu);font-size:.9rem}
 .dot{width:.6rem;height:.6rem;border-radius:50%;background:var(--cy);box-shadow:0 0 0 0 var(--cy);animation:pl 2s infinite}
 @keyframes pl{70%{box-shadow:0 0 0 .6rem transparent}100%{box-shadow:0 0 0 0 transparent}}
 @media (prefers-reduced-motion:reduce){.dot{animation:none}}
@@ -74,15 +87,18 @@ td,th{padding:.5rem .45rem}td{font-size:.95rem}.tot{font-size:1.2rem}
       <button class="tab sp" role="tab" data-v="cat" aria-selected="false">Por categoría</button>
       <button class="tab sp" role="tab" data-v="e1" aria-selected="false">Etapa 1</button>
       <button class="tab sp" role="tab" data-v="e2" aria-selected="false">Etapa 2</button>
+      <button class="tab sp" role="tab" data-v="fin" aria-selected="false">Clasificación Final</button>
       <button class="tab sp" role="tab" data-v="insc" aria-selected="false">Inscriptos</button>
     </div>
-    <div class="flex items-center gap-2 text-sm" style="color:var(--mu)" aria-live="polite">
-      <span class="dot"></span><span>En vivo · actualizado <b id="upd" class="text-white">--:--:--</b></span>
+    <div class="text-sm leading-tight text-right" aria-live="polite">
+      <div class="flex items-center justify-end gap-2 font-semibold text-white"><span class="dot"></span><span>En vivo</span></div>
+      <div class="mt-1" style="color:var(--mu)">Última actualización: <b id="upd" class="text-white">--:--:--</b></div>
     </div>
   </div>
   <div id="chips" class="flex flex-wrap gap-2 mb-4" aria-label="Filtro por categoría"></div>
   <p id="note" class="text-sm mb-3" style="color:var(--mu)"></p>
-  <div class="overflow-x-auto rounded-lg" style="border:1px solid var(--line)"><table id="tbl"></table></div>
+  <div id="fin" class="fgrid" hidden></div>
+  <div id="tw" class="overflow-x-auto rounded-lg" style="border:1px solid var(--line)"><table id="tbl"></table></div>
   <p id="foot" class="text-xs mt-3" style="color:var(--mu)">Solo se muestran tiempos netos de cada PE. Un DNF o abandono queda fuera del ordenamiento y no suma como tiempo.</p>
 </main>
 
@@ -91,7 +107,7 @@ td,th{padding:.5rem .45rem}td{font-size:.95rem}.tot{font-size:1.2rem}
 <script src="sponsors.js"></script>
 <script src="footer.js"></script>
 <script type="module">
-import { state, startLive, toRows, liveEvent } from './03_public-live-timing.js';
+import { state, startLive, toRows, liveEvent, clock } from './03_public-live-timing.js';
 import { rank, isN } from './ranking.js';
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
@@ -119,15 +135,40 @@ function inscriptos() {
     <td ${L}><span class="cat" style="display:inline-block;font-size:.9rem;font-style:italic;font-weight:800">${esc(c.category)}</span></td>${hasModel ? `<td ${L}>${esc(c.car_model)}</td>` : ''}<td ${L} style="color:var(--mu)">${esc(c.team)}</td></tr>`).join('')}</tbody>`;
 }
 
+// Clasificacion final: podio (top 3) por categoria. "Finalizado" cuando todas las tripulaciones de la categoria terminaron o abandonaron.
+function final() {
+  const n = PES.length, ks = CATS.filter(k => cat === 'all' || k === cat), car = new Map(CREWS.map(c => [c.car_number, c]));
+  $('#note').textContent = 'Top 3 de cada categoría con los tiempos validados. Mientras haya tripulaciones en carrera, el podio es provisorio.';
+  if (!ks.length) { $('#fin').innerHTML = '<p class="fc-e">Todavía no hay tiempos validados para este evento.</p>'; return }
+  $('#fin').innerHTML = ks.map(k => {
+    const rows = ROWS.filter(c => c.cat === k);
+    const top = rank(rows, 0, n).filter(x => isN(x.pos)).slice(0, 3);
+    const closed = n > 0 && rows.every(c => c.t.includes('DNF') || c.t.every(isN));
+    const list = top.map(x => {
+      const c = x.c, veh = car.get(c.n)?.car_model || c.pe || '';
+      const right = x.pos === 1 ? `<span class="sp it" style="font-size:1.5rem;color:var(--cy)">${f(x.tot)}</span>`
+        : x.part ? `<span class="text-sm" style="color:var(--mu)">${x.done}/${x.K} PE</span>`
+        : `<span class="sp it" style="font-size:1.3rem;color:var(--mu)">+${f(x.gap)}</span>`;
+      return `<div class="fc-r"><span class="sp it num">${x.pos}</span>
+        <div class="leading-tight min-w-0"><div class="font-semibold">${esc(c.p)}</div><div class="text-sm" style="color:var(--mu)">${esc(c.nv)}</div>
+        <div class="text-xs mt-1" style="color:var(--mu)">#${esc(c.n)}${veh ? ' · ' + esc(veh) : ''}</div></div>${right}</div>`;
+    }).join('') || '<p class="fc-e">Sin tiempos validados todavía.</p>';
+    return `<article class="fc"><div class="fc-h"><h3 class="sp text-2xl uppercase m-0">${esc(k)}</h3><span class="fc-st ${closed ? '' : 'prov'}">${closed ? 'Finalizado' : 'Provisorio'}</span></div>${list}</article>`;
+  }).join('');
+}
+
 function render() {
-  $('#foot').hidden = view === 'insc';
+  const fin = view === 'fin';
+  $('#foot').hidden = view === 'insc' || fin;
+  $('#tw').hidden = fin; $('#fin').hidden = !fin;
+  if (fin) { final(); return }
   if (view === 'insc') { inscriptos(); return }
   if (!ROWS.length) { $('#tbl').innerHTML = '<tbody><tr><td style="text-align:left">Todavía no hay tripulaciones cargadas para este evento.</td></tr></tbody>'; return }
   const n = PES.length, s2 = PES.findIndex(p => p.stages?.number === 2);
   const [a, b] = view === 'e2' && s2 >= 0 ? [s2, n] : view === 'e1' ? [0, s2 > 0 ? s2 : n] : [0, n];
   const rows = ROWS.filter(c => cat === 'all' || c.cat === cat);
   const lastCol = view === 'e1' ? 'Etapa 1' : view === 'e2' ? 'Etapa 2' : 'Acumulado';
-  let html = `<thead><tr><th class="stick">Pos / Auto / Tripulación</th>${PES.slice(a, b).map(p => `<th>${esc(p.name)}</th>`).join('')}<th>${lastCol}</th><th>Diferencia</th></tr></thead>`;
+  let html = `<thead><tr><th class="stick">Pos / Auto / Tripulación</th>${PES.slice(a, b).map(p => `<th class="c">${esc(p.name)}</th>`).join('')}<th>${lastCol}</th><th>Diferencia</th></tr></thead>`;
   const cols = b - a + 3;
   if (view === 'cat') CATS.filter(k => cat === 'all' || k === cat).forEach(k => {
     html += `<tbody><tr><td colspan="${cols}" class="sp text-2xl" style="background:#1b1030;text-align:left;border-left:4px solid var(--vi)">Categoría <span class="cat-lg">${esc(k)}</span></td></tr>${body(rank(rows.filter(c => c.cat === k), a, b), a, b)}</tbody>`;
@@ -150,7 +191,7 @@ function onData(st) {
   PES = st.stages; ROWS = toRows(st); CREWS = [...st.crews.values()];
   const cs = [...new Set(ROWS.map(r => r.cat))].sort();
   if (cs.join() !== CATS.join()) { CATS = cs; chips() }
-  $('#upd').textContent = new Date().toLocaleTimeString('es-AR', { hour12: false });
+  $('#upd').textContent = clock(st.last);   // hora del ultimo dato validado, no del reloj del equipo
   render();
 }
 // Encabezado desde la base: nombre, sede y fechas del evento ('YYYY-MM-DD', sin conversion de zona horaria).

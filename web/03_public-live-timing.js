@@ -6,7 +6,9 @@ const SUPABASE_URL = 'https://opvshuqgzznzqaaxdnai.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable__PAzpzPU6ixYma8JAM1Upw_IOsvrZvG';
 export const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-export const state = { crews: new Map(), stages: [], results: new Map() };
+export const state = { crews: new Map(), stages: [], results: new Map(), last: 0 };
+// Hora (zona Tierra del Fuego) en formato HH:MM:SS a partir de milisegundos. Sin dato = --:--:--
+export const clock = ms => ms ? new Date(ms).toLocaleTimeString('es-AR', { hourCycle: 'h23', timeZone: 'America/Argentina/Ushuaia' }) : '--:--:--';
 const key = r => `${r.special_stage_id}:${r.crew_id}`;
 
 export async function loadSnapshot(eventId) {
@@ -20,6 +22,8 @@ export async function loadSnapshot(eventId) {
   state.crews = new Map(c.data.map(x => [x.id, x]));
   state.stages = s.data;
   state.results = new Map(r.data.map(x => [key(x), x]));
+  // Ultima actualizacion = momento en que se valido/cargo el dato mas reciente (no el reloj del equipo).
+  state.last = Math.max(state.last, ...r.data.map(x => Date.parse(x.updated_at) || 0));
 }
 
 // onUpdate(state) se llama en cada cambio. Devuelve una funcion para cerrar la suscripcion.
@@ -32,12 +36,12 @@ export function startLive(eventId, onUpdate) {
   for (const ev of ['INSERT', 'UPDATE']) {
     channel.on('postgres_changes',
       { event: ev, schema: 'public', table: 'results', filter: `event_id=eq.${eventId}` },
-      p => { state.results.set(key(p.new), p.new); notify(); });
+      p => { state.results.set(key(p.new), p.new); state.last = Math.max(state.last, Date.parse(p.new.updated_at) || Date.now()); notify(); });
   }
   // Los DELETE no admiten filtro. Con RLS activa, p.old trae solo la clave primaria (special_stage_id y crew_id),
   // sin event_id: se borra por esa clave (si la fila es de otro evento, simplemente no esta en el mapa).
   channel.on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'results' },
-    p => { state.results.delete(key(p.old)); notify(); });
+    p => { state.results.delete(key(p.old)); state.last = Date.now(); notify(); });   // un tiempo reabierto tambien es un cambio
 
   channel.subscribe(status => {
     if (status === 'SUBSCRIBED') { clearInterval(poll); refresh(); }   // tambien resincroniza tras reconectar

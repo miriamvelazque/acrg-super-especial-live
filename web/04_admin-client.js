@@ -2,9 +2,23 @@
 // Reutiliza el mismo cliente; con sesion activa supabase-js envia el JWT y RLS deja pasar las escrituras.
 import { sb } from './03_public-live-timing.js';
 
-export async function signIn(email, password) {
+// Acepta un NOMBRE DE USUARIO ("Cronometrista 1") o, si lleva @, un email (los usuarios viejos siguen entrando).
+// El nombre se traduce a email con la funcion SQL public.login_email (ver 08_login_por_usuario.sql).
+export async function signIn(user, password) {
+  let email = String(user || '').trim().replace(/\s+/g, ' ');
+  if (!email) throw new Error('Ingresá tu usuario.');
+  if (!email.includes('@')) {
+    const { data, error } = await sb.rpc('login_email', { p_username: email });
+    if (error) {
+      if (error.code === 'PGRST202') throw new Error('Falta ejecutar 08_login_por_usuario.sql en Supabase.');
+      if (/fetch|network/i.test(error.message)) throw new Error('Sin conexión a internet.');
+      throw new Error('Usuario o contraseña incorrectos.');
+    }
+    if (!data) throw new Error('Usuario o contraseña incorrectos.');
+    email = data;
+  }
   const { data, error } = await sb.auth.signInWithPassword({ email, password });
-  if (error) throw new Error('Email o contraseña incorrectos.');
+  if (error) throw new Error(/fetch|network/i.test(error.message) ? 'Sin conexión a internet.' : 'Usuario o contraseña incorrectos.');
   return data.session;
 }
 export const signOut = () => sb.auth.signOut();
