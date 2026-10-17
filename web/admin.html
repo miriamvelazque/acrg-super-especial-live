@@ -22,6 +22,12 @@ input:focus,select:focus,button:focus-visible{outline:2px solid var(--cy);outlin
 table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
 td,th{padding:.5rem;border-top:1px solid var(--line);text-align:left;white-space:nowrap}
 th{font-size:.8rem;color:var(--mu)}
+/* Campo de contraseña con boton para mostrar/ocultar */
+.pw{position:relative}
+.pw input{padding-right:3.2rem}
+.eye{position:absolute;right:.35rem;top:50%;transform:translateY(-50%);width:2.4rem;height:2.4rem;display:flex;align-items:center;justify-content:center;background:transparent;border:0;border-radius:.4rem;font-size:1.35rem;line-height:1;cursor:pointer;color:#fff}
+.eye:hover{background:#1b1b20}
+.eye[aria-pressed=true]{background:#1b1b20}
 [hidden]{display:none!important}
 .err{color:#ff6b81;font-size:.9rem;min-height:1.2rem}
 </style>
@@ -34,7 +40,7 @@ th{font-size:.8rem;color:var(--mu)}
 </div></header>
 
 <section id="login" class="max-w-sm mx-auto px-4 py-10"><div class="card"><h2 class="sp text-2xl m-0 mb-3">Ingreso de personal</h2>
-<label for="lmail">Email</label><input id="lmail" type="email" autocomplete="username"><label for="lpass" class="mt-3">Contraseña</label><input id="lpass" type="password" autocomplete="current-password">
+<label for="lmail">Email</label><input id="lmail" type="email" autocomplete="username"><label for="lpass" class="mt-3">Contraseña</label><div class="pw"><input id="lpass" type="password" autocomplete="current-password"><button type="button" class="eye" id="lpw" aria-label="Mostrar contraseña" title="Mostrar contraseña" aria-pressed="false">👁️</button></div>
 <div class="err" id="lerr" role="alert"></div><button class="btn go sp mt-2" id="lgo">Ingresar</button></div></section>
 <main id="app" hidden class="max-w-5xl mx-auto px-4 py-5 grid gap-4 md:grid-cols-2">
   <section class="card" aria-label="Carga">
@@ -149,7 +155,8 @@ async function init(){
   $('login').hidden=true;$('app').hidden=false;$('so').hidden=false;
   await refresh();stop?.();stop=watchEntries(refresh);qlabel();calc();
 }
-function showLogin(){EV=null;ROLE=null;stop?.();$('login').hidden=false;$('app').hidden=true;$('so').hidden=true}
+function hidePw(){const i=$('lpass'),b=$('lpw');i.type='password';b.textContent='👁️';b.setAttribute('aria-pressed','false');b.setAttribute('aria-label','Mostrar contraseña');b.title='Mostrar contraseña'}
+function showLogin(){EV=null;ROLE=null;stop?.();hidePw();$('login').hidden=false;$('app').hidden=true;$('so').hidden=true}
 
 async function refresh(){
   if(!PES.length){ENTRIES=[];draw();return}
@@ -194,7 +201,8 @@ async function flush(){
 }
 $('sync').onclick=flush;addEventListener('online',flush);
 
-$('lgo').onclick=async()=>{$('lerr').textContent='';try{await signIn($('lmail').value.trim(),$('lpass').value)}catch(e){$('lerr').textContent=e.message}};
+$('lpw').onclick=()=>{const i=$('lpass'),b=$('lpw'),ver=i.type==='password';i.type=ver?'text':'password';b.textContent=ver?'🙈':'👁️';b.setAttribute('aria-pressed',String(ver));b.setAttribute('aria-label',ver?'Ocultar contraseña':'Mostrar contraseña');b.title=b.getAttribute('aria-label');i.focus()};
+$('lgo').onclick=async()=>{$('lerr').textContent='';const pw=$('lpass').value;hidePw();try{await signIn($('lmail').value.trim(),pw)}catch(e){$('lerr').textContent=e.message}};
 $('so').onclick=()=>signOut();
 // Importante: no llamar a supabase directo dentro del callback de auth (puede bloquearse); por eso el setTimeout.
 onAuth(s=>setTimeout(()=>{if(!s)showLogin();else if(!EV)init().catch(e=>{$('lerr').textContent=e.message})},0));
