@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rally Fueguino - Carga de tiempos</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,700;1,800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+:root{--bg:#0B0B0B;--panel:#141417;--line:#2a2a31;--cy:#00E5D9;--vi:#8A2BE2;--mu:#b4b4bd;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--bg);color:#fff;font-family:Barlow,system-ui,sans-serif;margin:0}
+.sp{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-style:italic;font-weight:800}
+.hero{background:linear-gradient(100deg,#0B0B0B 30%,#2a0f4a 100%);border-bottom:3px solid var(--cy)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:.6rem;padding:1rem}
+label{display:block;font-size:.85rem;color:var(--mu);margin-bottom:.25rem;font-weight:600}
+input,select{width:100%;background:#0B0B0B;color:#fff;border:1px solid #3a3a43;border-radius:.4rem;padding:.7rem;font-size:1.15rem;font-variant-numeric:tabular-nums}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--cy);outline-offset:1px}
+.btn{border-radius:.4rem;padding:.8rem 1.2rem;font-weight:700;font-size:1.1rem;cursor:pointer;border:1px solid var(--line);background:transparent;color:#fff}
+.go{background:var(--cy);color:#001514;border-color:var(--cy)}
+.res{font-size:3.2rem;line-height:1;color:var(--cy)}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+td,th{padding:.5rem;border-top:1px solid var(--line);text-align:left;white-space:nowrap}
+th{font-size:.8rem;color:var(--mu)}
+[hidden]{display:none!important}
+.err{color:#ff6b81;font-size:.9rem;min-height:1.2rem}
+</style>
+</head>
+<body>
+<header class="hero"><div class="max-w-5xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-3">
+  <div><h1 class="sp text-3xl md:text-4xl uppercase m-0 leading-none">Rally Fueguino · Carga de tiempos</h1>
+  <p class="m-0 mt-1 text-sm" style="color:var(--cy)">Panel de cronometristas, A.PI.TU.R.</p></div>
+  <div class="flex items-center gap-3"><div id="net" class="text-sm font-semibold"></div><button class="btn" id="so" hidden>Salir</button></div>
+</div></header>
+
+<section id="login" class="max-w-sm mx-auto px-4 py-10"><div class="card"><h2 class="sp text-2xl m-0 mb-3">Ingreso de personal</h2>
+<label for="lmail">Email</label><input id="lmail" type="email" autocomplete="username"><label for="lpass" class="mt-3">Contraseña</label><input id="lpass" type="password" autocomplete="current-password">
+<div class="err" id="lerr" role="alert"></div><button class="btn go sp mt-2" id="lgo">Ingresar</button></div></section>
+<main id="app" hidden class="max-w-5xl mx-auto px-4 py-5 grid gap-4 md:grid-cols-2">
+  <section class="card" aria-label="Carga">
+    <div class="grid grid-cols-2 gap-2 mb-3">
+      <div><label for="ev">Evento</label><select id="ev"><option>3ª fecha Río Grande</option></select></div>
+      <div><label for="pe">PE</label><select id="pe"></select></div>
+    </div>
+        <div class="grid grid-cols-3 gap-2 mb-1">
+      <div><label for="n">N° de auto</label><input id="n" list="autos" inputmode="numeric" placeholder="733" autocomplete="off"></div>
+      <div class="col-span-2 flex items-end pb-3 text-sm" id="crew" style="color:var(--mu)">Ingresá el número de auto</div>
+    </div>
+    <datalist id="autos"></datalist>
+    <div class="grid grid-cols-2 gap-2 mb-3">
+      <div><label for="s">Hora de largada (HH:MM)</label><input id="s" placeholder="10:15" inputmode="numeric" autocomplete="off"></div>
+      <div><label for="e">Hora de llegada (HH:MM:SS,cc)</label><input id="e" placeholder="10:25:41,30" inputmode="numeric" autocomplete="off"></div>
+      <div><label for="p">Penalización (MM:SS)</label><input id="p" placeholder="00:00" inputmode="numeric" autocomplete="off"></div>
+      <div class="flex items-end pb-3"><label class="flex items-center gap-2 m-0 text-base" style="color:#fff"><input id="dnf" type="checkbox" style="width:1.4rem;height:1.4rem"> DNF / Abandono</label></div>
+    </div>
+    <p class="text-xs" style="color:var(--mu);margin:0 0 .4rem">Escribí solo números: 1400 → 14:00 · 14035225 → 14:03:52,25</p>
+    <div class="err" id="err" role="alert"></div>
+    <div class="flex gap-2 mt-2"><button class="btn go sp" id="save">Guardar tiempo</button><button class="btn" id="ex" type="button">Cargar ejemplo</button></div>
+  </section>
+
+  <section class="card flex flex-col justify-between" aria-live="polite">
+    <div>
+      <p class="m-0 text-sm" style="color:var(--mu)">Tiempo de PE calculado</p>
+      <div class="res sp my-2" id="out">--:--.--</div>
+      <p class="m-0 text-sm" id="formula" style="color:var(--mu)">Llegada - largada + penalización</p>
+    </div>
+    <p class="text-xs mt-6 mb-0" style="color:var(--mu)">El público solo ve el tiempo neto, nunca las horas de largada y llegada. Un DNF no suma tiempo y queda fuera del ordenamiento.</p>
+  </section>
+
+  <section class="card md:col-span-2" aria-label="Cola de carga">
+    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+      <h2 class="sp text-2xl m-0">Cola de carga</h2>
+      <button class="btn" id="sync">Sincronizar pendientes</button>
+    </div>
+    <div class="overflow-x-auto"><table><thead><tr><th>PE</th><th>Auto</th><th>Tripulación</th><th>Tiempo PE</th><th>Penal.</th><th>Cargado</th><th>Estado</th></tr></thead><tbody id="log"></tbody></table></div>
+    <p id="empty" class="text-sm" style="color:var(--mu)">Todavía no cargaste tiempos. Completá el formulario y guardá.</p>
+  </section>
+</main>
+
+<script src="footer.js"></script>
+<script type="module">
+import { sb, state, loadSnapshot, liveEvent } from './03_public-live-timing.js';
+import { signIn, signOut, onAuth, myRole, saveEntry, validateEntry, watchEntries, loadStages } from './04_admin-client.js';
+const $=s=>document.getElementById(s);
+let CREW={},BYNUM={};
+const p2=v=>String(v).padStart(2,'0');
+const fmt=x=>{const m=Math.floor(x/6000),s=Math.floor(x/100)%60,c=x%100;return m+':'+p2(s)+'.'+p2(c)};
+// Todo se calcula en centésimas para evitar errores de punto flotante.
+function parseStart(v){const m=/^(\d{1,2}):(\d{2})$/.exec(v.trim());if(!m||+m[1]>23||+m[2]>59)return null;return (+m[1]*3600+ +m[2]*60)*100}
+function parseEnd(v){const m=/^(\d{1,2}):(\d{2}):(\d{2})[,.](\d{2})$/.exec(v.trim());if(!m||+m[1]>23||+m[2]>59||+m[3]>59)return null;return (+m[1]*3600+ +m[2]*60+ +m[3])*100+ +m[4]}
+function parsePen(v){if(!v.trim())return 0;const m=/^(\d{1,2}):(\d{2})$/.exec(v.trim());if(!m||+m[2]>59)return null;return (+m[1]*60+ +m[2])*100}
+
+function calc(){
+  const n=$('n').value.trim();$('crew').textContent=CREW[n]||(n?'Auto no inscripto':'Ingresá el número de auto');
+  if($('dnf').checked){$('out').textContent='DNF';$('formula').textContent='No suma tiempo y queda fuera del ordenamiento.';return {dnf:true}}
+  const s=parseStart($('s').value),e=parseEnd($('e').value),p=parsePen($('p').value);
+  let msg='',t=null;
+  if($('s').value.length>=5&&s==null)msg='Largada inválida: usá HH:MM (ej. 10:15).';
+  else if($('e').value.length>=11&&e==null)msg='Llegada inválida: usá HH:MM:SS,cc (ej. 10:25:41,30).';
+  else if(p==null){if($('p').value.length>=5)msg='Penalización inválida: usá MM:SS (ej. 00:10).'}
+  else if(s!=null&&e!=null){if(e<=s)msg='La llegada debe ser posterior a la largada.';else t=e-s+p}
+  $('err').textContent=msg;
+  $('out').textContent=t==null?'--:--.--':fmt(t);
+  $('formula').textContent=t==null?'Llegada - largada + penalización':`${fmt(e-s)} neto + ${fmt(p)} penalización`;
+  return {t,pen:p,msg,s,e};
+}
+// Mascara: se tipean solo digitos y se insertan : y , solos. Sin separador final, asi el borrado funciona normal.
+const MASK={s:{g:[2,2],sep:[':']},p:{g:[2,2],sep:[':']},e:{g:[2,2,2,2],sep:[':',':',',']}};
+function applyMask(id){
+  const {g,sep}=MASK[id],el=$(id),d=el.value.replace(/\D/g,'').slice(0,g.reduce((a,b)=>a+b,0));
+  let out='',i=0;
+  g.forEach((n,k)=>{const part=d.slice(i,i+n);if(part)out+=(k?sep[k-1]:'')+part;i+=n});
+  el.value=out;
+}
+['n','s','e','p','dnf'].forEach(id=>$(id).addEventListener('input',()=>{if(MASK[id])applyMask(id);$('err').textContent='';calc()}));
+$('ex').onclick=()=>{$('n').value='733';$('s').value='10:15';$('e').value='10:25:41,30';$('p').value='00:10';$('dnf').checked=false;calc()};
+
+let PES=[],EV=null,ROLE=null,ENTRIES=[],stop=null,Q=[];
+try{Q=JSON.parse(localStorage.getItem('rf-queue')||'[]')}catch{}
+const saveQ=()=>{try{localStorage.setItem('rf-queue',JSON.stringify(Q))}catch{}};
+const esc=s=>String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const canValidate=()=>['commissioner','admin'].includes(ROLE?.role);
+const isNet=e=>!navigator.onLine||/fetch|network/i.test(e.message);
+const qlabel=()=>{$('sync').textContent=Q.length?`Sincronizar pendientes (${Q.length})`:'Sincronizar pendientes'};
+
+function fillPE(){
+  const byN=new Map(PES.map(p=>[p.number,p])),max=Math.max(8,...byN.keys());
+  let h='';
+  for(let n=1;n<=max;n++){const p=byN.get(n);
+    h+=p?`<option value="${p.id}">${esc(p.name)}${p.stages?.number?' · Etapa '+p.stages.number:''}</option>`
+        :`<option value="">PE${n} (todavía no creada en la base)</option>`}
+  $('pe').innerHTML=h;peWarn();
+}
+const NOPE='Esa PE todavía no está creada en la base: pedile al administrador que la cree.';
+function peWarn(){$('err').textContent=$('pe').value?'':NOPE}
+$('pe').onchange=peWarn;
+
+async function init(){
+  ROLE=await myRole();
+  if(!ROLE){$('lerr').textContent='Tu usuario no tiene permisos de cronometrista.';await signOut();return}
+  EV=await liveEvent();
+  if(!EV){$('lerr').textContent='No hay un evento en vivo.';return}
+  await loadSnapshot(EV.id);
+  PES=await loadStages(EV.id);
+  CREW={};BYNUM={};
+  for(const c of state.crews.values()){BYNUM[c.car_number]=c;CREW[c.car_number]=`${c.driver} / ${c.co_driver||''} (${c.category})`}
+  $('autos').innerHTML=Object.keys(CREW).map(k=>`<option value="${k}">${esc(CREW[k])}</option>`).join('');
+  fillPE();
+  $('login').hidden=true;$('app').hidden=false;$('so').hidden=false;
+  await refresh();stop?.();stop=watchEntries(refresh);qlabel();calc();
+}
+function showLogin(){EV=null;ROLE=null;stop?.();$('login').hidden=false;$('app').hidden=true;$('so').hidden=true}
+
+async function refresh(){
+  if(!PES.length){ENTRIES=[];draw();return}
+  const {data,error}=await sb.from('time_entries').select('*').in('special_stage_id',PES.map(p=>p.id))
+    .order('updated_at',{ascending:false}).limit(100);
+  if(error){$('err').textContent=error.message;return}
+  ENTRIES=data;draw();
+}
+function draw(){
+  const pn=id=>esc(PES.find(p=>p.id===id)?.name);
+  const row=(pe,c,t,pen,when,st)=>`<tr><td>${pe}</td><td class="sp text-lg">${c?c.car_number:''}</td><td>${c?esc(c.driver+' / '+(c.co_driver||'')):''}</td><td class="sp text-lg" style="color:var(--cy)">${t}</td><td>${pen?fmt(pen):'-'}</td><td>${when}</td><td>${st}</td></tr>`;
+  const queued=Q.map(q=>row(pn(q.special_stage_id),state.crews.get(q.crew_id),q.status==='dnf'?'DNF':fmt(q.finish_cs-q.start_cs+q.penalty_cs),q.penalty_cs,'-','<span style="color:#ff6b81">Sin enviar</span>'));
+  const sent=ENTRIES.map(r=>row(pn(r.special_stage_id),state.crews.get(r.crew_id),r.status==='dnf'?'DNF':fmt(r.net_cs),r.penalty_cs,new Date(r.updated_at).toLocaleTimeString('es-AR',{hour12:false}),
+    (r.validated?'<span style="color:var(--cy)">Validado</span>':'<span style="color:#ff9f43">Sin validar</span>')+
+    (canValidate()?` <button class="btn" style="padding:.2rem .6rem;font-size:.9rem" data-v="${r.id}" data-on="${!r.validated}">${r.validated?'Reabrir':'Validar'}</button>`:'')));
+  $('empty').style.display=queued.length+sent.length?'none':'block';
+  $('log').innerHTML=queued.concat(sent).join('');
+}
+$('log').onclick=async e=>{const b=e.target.closest('[data-v]');if(!b)return;
+  const {error}=await validateEntry(b.dataset.v,b.dataset.on==='true');
+  if(error)$('err').textContent=error.message;else refresh()};
+
+$('save').onclick=async()=>{
+  const c=BYNUM[$('n').value.trim()],r=calc();
+  if(!$('pe').value){$('err').textContent=NOPE;return}
+  if(!c){$('err').textContent='Elegí un número de auto inscripto.';return}
+  if(!r.dnf&&r.t==null){$('err').textContent=r.msg||'Completá largada y llegada.';return}
+  const entry={special_stage_id:$('pe').value,crew_id:c.id,status:r.dnf?'dnf':'ok',start_cs:r.s,finish_cs:r.e,penalty_cs:r.pen||0};
+  try{await saveEntry(entry)}
+  catch(e){
+    if(!isNet(e)){$('err').textContent=e.message;return}
+    Q.push(entry);saveQ();qlabel();$('err').textContent='Sin conexión: el tiempo quedó guardado en este dispositivo y se enviará al sincronizar.';
+  }
+  ['n','s','e','p'].forEach(id=>$(id).value='');$('dnf').checked=false;calc();
+  if(navigator.onLine)await refresh();else draw();$('n').focus();
+};
+async function flush(){
+  if(!ROLE||!Q.length)return;
+  const rest=[];
+  for(const q of Q){try{await saveEntry(q)}catch(e){rest.push(q);$('err').textContent=isNet(e)?'Sin conexión: quedan pendientes.':e.message}}
+  Q=rest;saveQ();qlabel();await refresh();
+}
+$('sync').onclick=flush;addEventListener('online',flush);
+
+$('lgo').onclick=async()=>{$('lerr').textContent='';try{await signIn($('lmail').value.trim(),$('lpass').value)}catch(e){$('lerr').textContent=e.message}};
+$('so').onclick=()=>signOut();
+// Importante: no llamar a supabase directo dentro del callback de auth (puede bloquearse); por eso el setTimeout.
+onAuth(s=>setTimeout(()=>{if(!s)showLogin();else if(!EV)init().catch(e=>{$('lerr').textContent=e.message})},0));
+
+function net(){$('net').innerHTML=navigator.onLine?'<span style="color:var(--cy)">Conectado</span>':'<span style="color:#ff9f43">Sin conexión: se guarda en el dispositivo</span>'}
+addEventListener('online',net);addEventListener('offline',net);net();calc();draw();
+</script>
+</body>
+</html>
