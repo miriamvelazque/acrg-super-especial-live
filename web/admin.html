@@ -4,13 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Rally Fueguino - Carga de tiempos</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;1,700;1,800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;1,700;1,800&family=Barlow:wght@400;500;600&family=Orbitron:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 :root{--bg:#0B0B0B;--panel:#141417;--line:#2a2a31;--cy:#00E5D9;--vi:#8A2BE2;--mu:#b4b4bd;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{background:var(--bg);color:#fff;font-family:Barlow,system-ui,sans-serif;margin:0}
 .sp{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-style:normal;font-weight:800}
+.ttl{font-family:Orbitron,'Barlow Condensed',sans-serif;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+.logo{height:4rem;width:auto;max-width:100%;display:block}
 .hero{background:linear-gradient(100deg,#0B0B0B 30%,#2a0f4a 100%);border-bottom:3px solid var(--cy)}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:.6rem;padding:1rem}
 label{display:block;font-size:.85rem;color:var(--mu);margin-bottom:.25rem;font-weight:600}
@@ -26,8 +28,7 @@ th{font-size:.8rem;color:var(--mu)}
 .pw{position:relative}
 .pw input{padding-right:3.2rem}
 .eye{position:absolute;right:.35rem;top:50%;transform:translateY(-50%);width:2.4rem;height:2.4rem;display:flex;align-items:center;justify-content:center;background:transparent;border:0;border-radius:.4rem;font-size:1.35rem;line-height:1;cursor:pointer;color:#fff}
-.eye:hover{background:#1b1b20}
-.eye[aria-pressed=true]{background:#1b1b20}
+.eye:hover{transform:translateY(-50%) scale(1.15)}
 .dot{width:.7rem;height:.7rem;border-radius:50%;color:var(--cy);background:currentColor;box-shadow:0 0 0 0 currentColor;animation:pl 2s infinite;flex:none}
 .dot-lg{width:1.15rem;height:1.15rem}
 .dot.off{color:#ff4d4d}
@@ -36,7 +37,7 @@ th{font-size:.8rem;color:var(--mu)}
 ::placeholder{color:#7d7d88;opacity:1}
 /* Cola de carga: columnas fijas para que Sin validar / Validado no muevan nada */
 #qt{table-layout:fixed;min-width:54rem}
-#qt td,#qt th{overflow:hidden;text-overflow:ellipsis}
+#qt td,#qt th{overflow:hidden;text-overflow:ellipsis;text-align:center}
 #qt .col-st{text-align:center}
 .st{display:flex;align-items:center;justify-content:center;gap:.6rem}
 .st-t{display:inline-block;width:6.5rem;text-align:center}
@@ -48,8 +49,9 @@ th{font-size:.8rem;color:var(--mu)}
 </head>
 <body>
 <header class="hero"><div class="max-w-5xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-3">
-  <div><h1 class="sp text-3xl md:text-4xl uppercase m-0 leading-none">Rally Fueguino · Carga de tiempos</h1>
-  <p class="m-0 mt-1 text-sm" style="color:var(--cy)">Panel de cronometristas, A.PI.TU.R.</p></div>
+  <div class="flex items-center gap-4"><img class="logo" src="assets/logo-rally-fueguino.png" alt="Rally Fueguino A.PI.TU.R." width="640" height="179">
+  <div><h1 class="ttl text-lg md:text-2xl m-0 leading-tight">Carga de tiempos</h1>
+  <p class="m-0 mt-1 text-sm" style="color:var(--cy)">Panel de cronometristas, A.PI.TU.R.</p></div></div>
   <div id="hdr" class="flex flex-wrap items-center gap-4" hidden>
     <div id="who" class="text-sm font-semibold" style="color:var(--cy)">Conectado</div>
     <div class="leading-tight text-right" aria-live="polite">
@@ -60,8 +62,8 @@ th{font-size:.8rem;color:var(--mu)}
   </div>
 </div></header>
 
-<section id="login" class="max-w-sm mx-auto px-4 py-10"><div class="card"><h2 class="sp text-2xl m-0 mb-3">Ingreso de personal</h2>
-<label for="luser">Usuario</label><input id="luser" type="text" autocomplete="username" autocapitalize="words" spellcheck="false" placeholder="Cronometrista 1"><label for="lpass" class="mt-3">Contraseña</label><div class="pw"><input id="lpass" type="password" autocomplete="current-password"><button type="button" class="eye" id="lpw" aria-label="Mostrar contraseña" title="Mostrar contraseña" aria-pressed="false">👁️</button></div>
+<section id="login" class="max-w-sm mx-auto px-4 py-10"><div class="card"><h2 class="ttl text-lg m-0 mb-3">Ingreso de personal</h2>
+<label for="luser">Usuario</label><input id="luser" type="text" autocomplete="username" autocapitalize="words" spellcheck="false" placeholder="Cronometrista 1"><label for="lpass" class="mt-3">Contraseña</label><div class="pw"><input id="lpass" type="password" autocomplete="current-password"><button type="button" class="eye" id="lpw" aria-label="Mostrar contraseña" title="Mostrar contraseña" aria-pressed="false">🙈</button></div>
 <div class="err" id="lerr" role="alert"></div><button class="btn go sp mt-2" id="lgo">Ingresar</button></div></section>
 <main id="app" hidden class="max-w-5xl mx-auto px-4 py-5 grid gap-4 md:grid-cols-2">
   <section class="card" aria-label="Carga">
@@ -70,7 +72,7 @@ th{font-size:.8rem;color:var(--mu)}
       <div><label for="pe">PE</label><select id="pe"></select></div>
     </div>
         <div class="grid grid-cols-3 gap-2 mb-1">
-      <div><label for="n">N° de auto</label><input id="n" list="autos" inputmode="numeric" placeholder="733" autocomplete="off"></div>
+      <div><label for="n">N° de auto</label><input id="n" list="autos" inputmode="numeric" placeholder="000" autocomplete="off"></div>
       <div class="col-span-2 flex items-end pb-3 text-sm" id="crew" style="color:var(--mu)">Ingresá el número de auto</div>
     </div>
     <datalist id="autos"></datalist>
@@ -97,7 +99,7 @@ th{font-size:.8rem;color:var(--mu)}
 
   <section class="card md:col-span-2" aria-label="Cola de carga">
     <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-      <h2 class="sp text-2xl m-0">Cola de carga</h2>
+      <h2 class="ttl text-lg m-0">Cola de carga</h2>
       <button class="btn" id="sync">Sincronizar pendientes</button>
     </div>
     <div class="overflow-x-auto"><table id="qt"><colgroup><col style="width:4.5rem"><col style="width:4.5rem"><col><col style="width:7.5rem"><col style="width:5.5rem"><col style="width:6.5rem"><col style="width:15rem"></colgroup><thead><tr><th>PE</th><th>Auto</th><th>Tripulación</th><th>Tiempo PE</th><th>Penal.</th><th>Cargado</th><th class="col-st">Estado</th></tr></thead><tbody id="log"></tbody></table></div>
@@ -193,7 +195,7 @@ async function init(){
   await refresh();stop?.();stop=watchEntries(refresh);qlabel();calc();
   clearInterval(pingT);pingT=setInterval(ping,12000);ping();if(Q.length)flush();
 }
-function hidePw(){const i=$('lpass'),b=$('lpw');i.type='password';b.textContent='👁️';b.setAttribute('aria-pressed','false');b.setAttribute('aria-label','Mostrar contraseña');b.title='Mostrar contraseña'}
+function hidePw(){const i=$('lpass'),b=$('lpw');i.type='password';b.textContent='🙈';b.setAttribute('aria-pressed','false');b.setAttribute('aria-label','Mostrar contraseña');b.title='Mostrar contraseña'}
 function showLogin(){EV=null;ROLE=null;stop?.();hidePw();$('login').hidden=false;$('app').hidden=true;$('hdr').hidden=true;clearInterval(pingT)}
 
 async function refresh(){
@@ -245,7 +247,7 @@ async function flush(){
 }
 $('sync').onclick=flush;addEventListener('online',ping);addEventListener('offline',()=>setOnline(false));
 
-$('lpw').onclick=()=>{const i=$('lpass'),b=$('lpw'),ver=i.type==='password';i.type=ver?'text':'password';b.textContent=ver?'🙈':'👁️';b.setAttribute('aria-pressed',String(ver));b.setAttribute('aria-label',ver?'Ocultar contraseña':'Mostrar contraseña');b.title=b.getAttribute('aria-label');i.focus()};
+$('lpw').onclick=()=>{const i=$('lpass'),b=$('lpw'),ver=i.type==='password';i.type=ver?'text':'password';b.textContent=ver?'👁️':'🙈';b.setAttribute('aria-pressed',String(ver));b.setAttribute('aria-label',ver?'Ocultar contraseña':'Mostrar contraseña');b.title=b.getAttribute('aria-label');i.focus()};
 $('lgo').onclick=async()=>{$('lerr').textContent='';const pw=$('lpass').value;hidePw();try{await signIn($('luser').value,pw)}catch(e){$('lerr').textContent=e.message}};
 $('so').onclick=()=>signOut();
 ['luser','lpass'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter')$('lgo').click()}));

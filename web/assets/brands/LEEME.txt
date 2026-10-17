@@ -1,0 +1,5 @@
+Logos de marca para la pestana Inscriptos.
+Un PNG por marca, fondo transparente, cuadrado (aprox. 64x64 px), con el nombre en minuscula y sin espacios ni tildes:
+  ford.png  peugeot.png  skoda.png  vw.png  toyota.png  citroen.png  renault.png  fiat.png  chevrolet.png
+El nombre sale de la PRIMERA palabra del campo car_model (crews): "Ford Fiesta" -> ford.png, "VW Polo" o "Volkswagen Polo" -> vw.png.
+Si falta el archivo de una marca, el modelo se muestra igual, solo sin logo.
