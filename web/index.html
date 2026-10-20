@@ -100,7 +100,7 @@ td,th{padding:.5rem .45rem}td{font-size:.95rem}.tot{font-size:1.2rem}
       <div class="mt-1" style="color:var(--mu)">Última actualización: <b id="upd" class="text-white">--:--:--</b></div>
     </div>
   </div>
-  <div id="chips" class="flex flex-wrap gap-2 mb-4" aria-label="Filtro por categoría"></div>
+  <div id="chips" class="flex flex-wrap gap-3.5 mb-4" aria-label="Filtro por categoría"></div>
   <p id="note" class="text-sm mb-3" style="color:var(--mu)"></p>
   <div id="fin" class="fgrid" hidden></div>
   <div id="tw" class="overflow-x-auto rounded-lg" style="border:1px solid var(--line)"><table id="tbl"></table></div>
@@ -199,7 +199,7 @@ function render() {
       e2: 'Etapa 2 independiente: suma solo de sus PE.' }[view];
 }
 function chips() {
-  $('#chips').innerHTML = ['all', ...CATS].map(k => `<button class="chip text-lg" data-c="${esc(k)}" aria-pressed="${k === cat}">${k === 'all' ? 'Todas' : esc(k)}</button>`).join('');
+  $('#chips').innerHTML = ['all', ...CATS].map(k => `<button class="chip text-lg" data-c="${esc(k)}" aria-pressed="${k === cat}">${k === 'all' ? 'TODAS' : esc(k)}</button>`).join('');
 }
 $('#chips').onclick = e => { const b = e.target.closest('[data-c]'); if (!b) return; cat = b.dataset.c; chips(); render() };
 document.querySelector('[role=tablist]').onclick = e => { const b = e.target.closest('[data-v]'); if (!b) return; view = b.dataset.v; document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', x === b)); render() };

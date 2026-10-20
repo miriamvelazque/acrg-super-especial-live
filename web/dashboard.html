@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rally Fueguino - Dashboard de carrera</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;1,700;1,800&family=Barlow:wght@400;500;600&family=Orbitron:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#0B0B0B;--panel:#141417;--line:#2a2a31;--cy:#00E5D9;--vi:#8A2BE2;--tx:#fff;--mu:#b4b4bd;--or:#ff9f43;--rd:#ff6b81}
+body{background:var(--bg);color:var(--tx);font-family:Barlow,system-ui,sans-serif;margin:0}
+.sp{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-weight:800}.it{font-style:italic}
+.ttl{font-family:Orbitron,'Barlow Condensed',sans-serif;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+.hero{background:linear-gradient(100deg,#0B0B0B 30%,#2a0f4a 100%);border-bottom:3px solid var(--cy)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:.7rem;padding:1rem 1.1rem}
+.card h2{font-size:.95rem;margin:0 0 .15rem}.card p.sub{margin:0 0 .7rem;font-size:.82rem;color:var(--mu)}
+.kpi b{display:block;font-size:2.1rem;line-height:1.05;color:var(--cy)}.kpi span{font-size:.82rem;color:var(--mu)}
+.chip{font-family:'Barlow Condensed',sans-serif;background:var(--cy);color:#001514;border:1.5px solid var(--cy);padding:.15rem .8rem;border-radius:.3rem;font-weight:800;font-style:italic;cursor:pointer;line-height:1.5;font-size:1.1rem}
+.chip[aria-pressed=true]{background:transparent;color:var(--cy);box-shadow:0 0 0 3px rgba(0,229,217,.28)}
+.cr{border:1.5px solid var(--line);background:#101013;color:var(--mu);padding:.2rem .6rem;border-radius:.4rem;font-size:.82rem;cursor:pointer}
+.cr[aria-pressed=true]{color:#fff;border-color:currentColor;background:#17171b}
+.btn{border:1px solid var(--line);background:#101013;color:#fff;border-radius:.4rem;padding:.2rem .7rem;font-size:.82rem;cursor:pointer}
+select{background:#0a0a0a;color:#fff;border:1px solid var(--line);border-radius:.4rem;padding:.35rem .5rem;font:inherit}
+table{border-collapse:collapse;width:100%;font-size:.9rem}th{color:var(--mu);font-weight:600;font-size:.78rem;padding:.35rem .4rem;text-align:center}
+td{padding:.4rem;text-align:center;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
+.dot{width:.6rem;height:.6rem;border-radius:50%;background:var(--cy);display:inline-block}
+.cv{position:relative;height:320px}
+:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="max-w-[1400px] mx-auto px-4 py-4 flex flex-wrap items-center gap-4 justify-between">
+    <div class="flex items-center gap-4"><img src="assets/logo-rally-fueguino.png" alt="Rally Fueguino A.PI.TU.R." width="640" height="179" style="height:4.5rem;width:auto">
+      <div><h1 class="ttl text-lg md:text-2xl m-0 leading-tight">Dashboard de carrera</h1><p id="evname" class="m-0 mt-1 text-sm" style="color:var(--cy)">Cargando…</p></div></div>
+    <div class="text-sm text-right leading-tight"><div class="flex items-center justify-end gap-2 font-semibold"><span class="dot"></span>En vivo</div>
+      <div style="color:var(--mu)">Última actualización: <b id="upd" class="text-white">--:--:--</b></div>
+      <a href="index.html" style="color:var(--cy)">← Volver al Live Timing</a></div>
+  </div>
+</header>
+<main class="max-w-[1400px] mx-auto px-4 py-5 grid gap-4">
+  <div id="kpis" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3"></div>
+  <div class="card">
+    <div class="flex flex-wrap items-center gap-3 mb-3"><span class="text-sm" style="color:var(--mu)">Categoría:</span><div id="chips" class="flex flex-wrap gap-3.5"></div></div>
+    <div class="flex flex-wrap items-center gap-2"><span class="text-sm" style="color:var(--mu)">Tripulaciones en los gráficos:</span>
+      <button class="btn" data-q="5">Top 5</button><button class="btn" data-q="10">Top 10</button><button class="btn" data-q="0">Ninguna</button></div>
+    <div id="crews" class="flex flex-wrap gap-2 mt-3"></div>
+  </div>
+  <div class="grid lg:grid-cols-2 gap-4">
+    <section class="card"><h2 class="ttl">Posición PE a PE</h2><p class="sub">Cómo subió o bajó cada tripulación en la clasificación general (1 = líder).</p><div class="cv"><canvas id="c-pos"></canvas></div></section>
+    <section class="card"><h2 class="ttl">Diferencia con el líder</h2><p class="sub">Segundos de diferencia con el líder, acumulados PE a PE. Más arriba = más cerca del líder.</p><div class="cv"><canvas id="c-gap"></canvas></div></section>
+  </div>
+  <div class="grid lg:grid-cols-2 gap-4">
+    <section class="card"><h2 class="ttl">Ganador de cada PE</h2><p class="sub">Quién hizo el mejor tiempo y por cuánto le ganó al segundo.</p><div class="overflow-x-auto"><table id="win"></table></div></section>
+    <section class="card"><h2 class="ttl">Abandonos y penalizaciones</h2><p class="sub">Cantidad de tripulaciones por PE.</p><div class="cv" style="height:250px"><canvas id="c-inc"></canvas></div></section>
+  </div>
+  <section class="card"><h2 class="ttl">Duelo</h2><p class="sub">Elegí dos tripulaciones y compará su tiempo en cada PE. Barra hacia arriba = gana la A; hacia abajo = gana la B.</p>
+    <div class="flex flex-wrap items-center gap-3 mb-2"><label>A <select id="da"></select></label><label>B <select id="db"></select></label><span id="dres" class="text-sm" style="color:var(--cy)"></span></div>
+    <div class="cv" style="height:260px"><canvas id="c-duel"></canvas></div></section>
+  <p class="text-xs" style="color:var(--mu)">Solo se usan tiempos netos validados por el comisario. Un abandono (DNF) no suma tiempo y queda fuera de las comparaciones.</p>
+</main>
+<script src="sponsors.js"></script>
+<script type="module">
+import { state, startLive, toRows, liveEvent, clock } from './03_public-live-timing.js';
+import { rank, isN } from './ranking.js';
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
+const p2 = v => String(v).padStart(2, '0');
+const f = x => { const h = Math.floor(x / 360000), m = Math.floor(x / 6000) % 60, s = Math.floor(x / 100) % 60, c = x % 100; return (h ? h + ':' + p2(m) : m) + ':' + p2(s) + '.' + p2(c) };
+const PAL = ['#00E5D9', '#8A2BE2', '#ff9f43', '#ff6b81', '#7ee787', '#58a6ff', '#f2cc60', '#d2a8ff', '#ffa657', '#a5d6ff', '#ff7b72', '#56d364'];
+let PES = [], ROWS = [], CATS = [], cat = 'all', sel = new Set(), initSel = false, duel = [null, null];
+const charts = {};
+Chart.defaults.color = '#b4b4bd'; Chart.defaults.borderColor = '#2a2a31'; Chart.defaults.font.family = 'Barlow, system-ui, sans-serif';
+const draw = (id, cfg) => { charts[id]?.destroy(); charts[id] = new Chart($('#' + id), { ...cfg, options: { responsive: true, maintainAspectRatio: false, animation: false, ...cfg.options } }) };
+const nom = p => { const w = String(p).split(' '); return w[0].length <= 3 && w[1] ? w[0] + ' ' + w[1] : w[0] };
+const label = c => `#${c.n} ${nom(c.p)}`;
+const color = c => PAL[[...sel].indexOf(c.n) % PAL.length];
+
+// posicion y diferencia acumuladas, PE a PE, de la categoria elegida
+function series(rows) {
+  const pos = new Map(rows.map(c => [c.n, []])), gap = new Map(rows.map(c => [c.n, []]));
+  PES.forEach((_, i) => {
+    const r = rank(rows, 0, i + 1), K = r.length ? r[0].K : 0;
+    r.forEach(x => { const ok = isN(x.pos) && K === i + 1;
+      pos.get(x.c.n).push(ok ? x.pos : null); gap.get(x.c.n).push(ok && x.gap != null ? x.gap / 100 : null) });
+  });
+  return { pos, gap };
+}
+function render() {
+  const rows = ROWS.filter(c => cat === 'all' || c.cat === cat), n = PES.length;
+  const final = rank(rows, 0, n), ordered = final.map(x => x.c);
+  if (!initSel && ordered.length) { sel = new Set(ordered.slice(0, 5).map(c => c.n)); initSel = true }
+  sel = new Set([...sel].filter(k => rows.some(c => c.n === k)));
+  const { pos, gap } = series(rows);
+  const done = PES.filter((_, i) => rows.some(c => c.t[i] !== undefined)).length;
+  const dnf = rows.filter(c => c.t.includes('DNF')).length;
+  const lead = final.find(x => isN(x.pos)), sec = final.filter(x => isN(x.pos) && !x.part)[1];
+  const kp = [[rows.length, 'tripulaciones'], [rows.length - dnf, 'en carrera'], [dnf, 'abandonos'], [`${done}/${n}`, 'PE disputadas'],
+    [lead ? '#' + lead.c.n : '-', lead ? 'líder · ' + esc(nom(lead.c.p)) : 'líder'], [sec && lead && !lead.part ? '+' + f(sec.gap) : '-', 'del 1.º al 2.º']];
+  $('#kpis').innerHTML = kp.map(([v, l]) => `<div class="card kpi"><b class="sp it">${v}</b><span>${l}</span></div>`).join('');
+  $('#crews').innerHTML = ordered.filter(c => isN(final.find(x => x.c === c)?.pos)).slice(0, 24).map(c => `<button class="cr" data-n="${c.n}" aria-pressed="${sel.has(c.n)}" style="${sel.has(c.n) ? 'color:' + color(c) : ''}">${esc(label(c))}</button>`).join('');
+  const chosen = ordered.filter(c => sel.has(c.n)), L = PES.map(p => p.name);
+  const line = (m, c) => ({ label: label(c), data: m.get(c.n), borderColor: color(c), backgroundColor: color(c), tension: .25, pointRadius: 3, spanGaps: false });
+  draw('c-pos', { type: 'line', data: { labels: L, datasets: chosen.map(c => line(pos, c)) }, options: { scales: { y: { reverse: true, min: 1, suggestedMax: Math.min(rows.length, 12), ticks: { stepSize: 1, precision: 0 } } } } });
+  draw('c-gap', { type: 'line', data: { labels: L, datasets: chosen.map(c => line(gap, c)) }, options: { scales: { y: { reverse: true, min: 0, title: { display: true, text: 'segundos' } } } } });
+  // ganador por PE
+  $('#win').innerHTML = `<thead><tr><th>PE</th><th>Ganador</th><th>Tiempo</th><th>Ventaja</th>${PES.some(p => p.distance_km) ? '<th>km/h</th>' : ''}</tr></thead><tbody>` + PES.map((p, i) => {
+    const t = rows.map(c => ({ c, v: c.t[i] })).filter(x => isN(x.v)).sort((a, b) => a.v - b.v);
+    if (!t.length) return `<tr><td>${esc(p.name)}</td><td colspan="3" style="color:var(--mu)">sin tiempos</td></tr>`;
+    const kmh = p.distance_km ? `<td>${(p.distance_km / (t[0].v / 360000)).toFixed(1)}</td>` : '';
+    return `<tr><td class="sp">${esc(p.name)}</td><td style="text-align:left">#${t[0].c.n} ${esc(t[0].c.p)}</td><td style="color:var(--cy)">${f(t[0].v)}</td><td>${t[1] ? '+' + f(t[1].v - t[0].v) : '-'}</td>${kmh}</tr>` }).join('') + '</tbody>';
+  draw('c-inc', { type: 'bar', data: { labels: L, datasets: [
+    { label: 'Abandonos', data: PES.map((_, i) => rows.filter(c => c.t[i] === 'DNF').length), backgroundColor: '#ff6b81' },
+    { label: 'Con penalización', data: PES.map((_, i) => rows.filter(c => (c.pen[i] || 0) > 0).length), backgroundColor: '#ff9f43' }] }, options: { scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } } });
+  // duelo
+  const opts = ordered.map(c => `<option value="${c.n}">${esc(label(c))} · ${esc(c.p)}</option>`).join('');
+  if (!ordered.some(c => c.n === duel[0]) || !ordered.some(c => c.n === duel[1])) duel = [ordered[0]?.n ?? null, ordered[1]?.n ?? null];
+  $('#da').innerHTML = opts; $('#db').innerHTML = opts; $('#da').value = duel[0]; $('#db').value = duel[1];
+  const A = rows.find(c => c.n === +duel[0]), B = rows.find(c => c.n === +duel[1]);
+  if (A && B) {
+    const d = PES.map((_, i) => isN(A.t[i]) && isN(B.t[i]) ? (B.t[i] - A.t[i]) / 100 : null), g = d.filter(v => v !== null);   // positivo = gana A
+    $('#dres').textContent = g.length ? `${esc(label(A))} gana ${g.filter(v => v > 0).length} de ${g.length} PE · ${esc(label(B))} gana ${g.filter(v => v < 0).length}` : 'Sin PE en común todavía.';
+    draw('c-duel', { type: 'bar', data: { labels: L, datasets: [{ label: `Ventaja de ${label(A)} (s)`, data: d, backgroundColor: d.map(v => v === null ? '#2a2a31' : v > 0 ? '#00E5D9' : '#8A2BE2') }] },
+      options: { plugins: { legend: { display: false } }, scales: { y: { title: { display: true, text: 'ventaja de A (segundos)' } } } } });
+  }
+}
+function chips() { $('#chips').innerHTML = ['all', ...CATS].map(k => `<button class="chip" data-c="${esc(k)}" aria-pressed="${k === cat}">${k === 'all' ? 'TODAS' : esc(k)}</button>`).join('') }
+$('#chips').onclick = e => { const b = e.target.closest('[data-c]'); if (!b) return; cat = b.dataset.c; initSel = false; chips(); render() };
+$('#crews').onclick = e => { const b = e.target.closest('[data-n]'); if (!b) return; const k = +b.dataset.n; sel.has(k) ? sel.delete(k) : sel.add(k); render() };
+document.querySelectorAll('[data-q]').forEach(b => b.onclick = () => { const q = +b.dataset.q, rows = ROWS.filter(c => cat === 'all' || c.cat === cat);
+  sel = new Set(rank(rows, 0, PES.length).filter(x => isN(x.pos)).slice(0, q).map(x => x.c.n)); render() });
+$('#da').onchange = e => { duel[0] = +e.target.value; render() }; $('#db').onchange = e => { duel[1] = +e.target.value; render() };
+function onData(st) {
+  PES = st.stages; ROWS = toRows(st);
+  const cs = [...new Set(ROWS.map(r => r.cat))].sort(); if (cs.join() !== CATS.join()) { CATS = cs; chips() }
+  $('#upd').textContent = clock(st.last); render();
+}
+chips();
+try { const ev = await liveEvent(); if (ev) { $('#evname').textContent = ev.name; startLive(ev.id, onData) } else $('#evname').textContent = 'Sin evento en vivo' }
+catch (e) { console.error(e); $('#evname').textContent = 'No pudimos conectar con el servidor.' }
+</script>
+</body>
+</html>
