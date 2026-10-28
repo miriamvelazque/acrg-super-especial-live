@@ -44,7 +44,7 @@ También incluye:
 - Nacionalidad de piloto y navegante, con banderas en la vista de inscriptos.
 - Marca y modelo del vehículo en la clasificación.
 - Historial de cargas, correcciones, validaciones, reaperturas y borrados.
-- Login del personal por nombre de usuario; los usuarios existentes también pueden ingresar con email.
+- Login del personal por nombre de usuario.
 - Configuración centralizada de marcas y espacios de sponsors.
 
 ## Tecnologías
