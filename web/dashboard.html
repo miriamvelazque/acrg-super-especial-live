@@ -21,11 +21,16 @@ body{background:var(--bg);color:var(--tx);font-family:Barlow,system-ui,sans-seri
 .cr{border:1.5px solid var(--line);background:#101013;color:var(--mu);padding:.2rem .6rem;border-radius:.4rem;font-size:.82rem;cursor:pointer}
 .cr[aria-pressed=true]{color:#fff;border-color:currentColor;background:#17171b}
 .btn{border:1px solid var(--line);background:#101013;color:#fff;border-radius:.4rem;padding:.2rem .7rem;font-size:.82rem;cursor:pointer}
+.btn[aria-pressed=true]{background:rgba(0,229,217,.16);border-color:var(--cy);color:var(--cy);font-weight:600;box-shadow:0 0 0 2px rgba(0,229,217,.22)}
 select{background:#0a0a0a;color:#fff;border:1px solid var(--line);border-radius:.4rem;padding:.35rem .5rem;font:inherit}
 table{border-collapse:collapse;width:100%;font-size:.9rem}th{color:var(--mu);font-weight:600;font-size:.78rem;padding:.35rem .4rem;text-align:center}
 td{padding:.4rem;text-align:center;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
 .dot{width:.6rem;height:.6rem;border-radius:50%;background:var(--cy);display:inline-block}
 .cv{position:relative;height:320px}
+#sponsors{margin-top:.5rem;text-align:center}#sponsors h2{font-size:.8rem;letter-spacing:.12em;color:var(--mu);margin:0 0 .8rem}
+.sps{display:flex;flex-wrap:wrap;gap:14px 28px;align-items:center;justify-content:center;margin-bottom:.6rem}
+.sps img{display:block;object-fit:contain;height:auto;width:auto;max-height:30px;max-width:110px;opacity:.9}.sps.t img{max-height:36px;max-width:140px;opacity:1}
+.sps a{display:inline-flex}.sps .txt{font-weight:600}
 :focus-visible{outline:2px solid var(--cy);outline-offset:2px}
 </style>
 </head>
@@ -44,7 +49,7 @@ td{padding:.4rem;text-align:center;border-top:1px solid var(--line);font-variant
   <div class="card">
     <div class="flex flex-wrap items-center gap-3 mb-3"><span class="text-sm" style="color:var(--mu)">Categoría:</span><div id="chips" class="flex flex-wrap gap-3.5"></div></div>
     <div class="flex flex-wrap items-center gap-2"><span class="text-sm" style="color:var(--mu)">Tripulaciones en los gráficos:</span>
-      <button class="btn" data-q="5">Top 5</button><button class="btn" data-q="10">Top 10</button><button class="btn" data-q="0">Ninguna</button></div>
+      <button class="btn" data-q="5" aria-pressed="false">Top 5</button><button class="btn" data-q="10" aria-pressed="false">Top 10</button><button class="btn" data-q="0" aria-pressed="false">Ninguna</button></div>
     <div id="crews" class="flex flex-wrap gap-2 mt-3"></div>
   </div>
   <div class="grid lg:grid-cols-2 gap-4">
@@ -59,8 +64,10 @@ td{padding:.4rem;text-align:center;border-top:1px solid var(--line);font-variant
     <div class="flex flex-wrap items-center gap-3 mb-2"><label>A <select id="da"></select></label><label>B <select id="db"></select></label><span id="dres" class="text-sm" style="color:var(--cy)"></span></div>
     <div class="cv" style="height:260px"><canvas id="c-duel"></canvas></div></section>
   <p class="text-xs" style="color:var(--mu)">Solo se usan tiempos netos validados por el comisario. Un abandono (DNF) no suma tiempo y queda fuera de las comparaciones.</p>
+  <section id="sponsors" aria-label="Sponsors"></section>
 </main>
 <script src="sponsors.js"></script>
+<script src="footer.js"></script>
 <script type="module">
 import { state, startLive, toRows, liveEvent, clock } from './03_public-live-timing.js';
 import { rank, isN } from './ranking.js';
@@ -100,10 +107,19 @@ function render() {
     [lead ? '#' + lead.c.n : '-', lead ? 'líder · ' + esc(nom(lead.c.p)) : 'líder'], [sec && lead && !lead.part ? '+' + f(sec.gap) : '-', 'del 1.º al 2.º']];
   $('#kpis').innerHTML = kp.map(([v, l]) => `<div class="card kpi"><b class="sp it">${v}</b><span>${l}</span></div>`).join('');
   $('#crews').innerHTML = ordered.filter(c => isN(final.find(x => x.c === c)?.pos)).slice(0, 24).map(c => `<button class="cr" data-n="${c.n}" aria-pressed="${sel.has(c.n)}" style="${sel.has(c.n) ? 'color:' + color(c) : ''}">${esc(label(c))}</button>`).join('');
+  // Marca el boton activo (Top 5 / Top 10 / Ninguna) segun la seleccion actual; si se eligio a mano, ninguno.
+  const topN = q => new Set(final.filter(x => isN(x.pos)).slice(0, q).map(x => x.c.n));
+  const same = a => a.size === sel.size && [...a].every(k => sel.has(k));
+  const active = sel.size === 0 ? 0 : same(topN(5)) ? 5 : same(topN(10)) ? 10 : -1;
+  document.querySelectorAll('[data-q]').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.q === active)));
   const chosen = ordered.filter(c => sel.has(c.n)), L = PES.map(p => p.name);
-  const line = (m, c) => ({ label: label(c), data: m.get(c.n), borderColor: color(c), backgroundColor: color(c), tension: .25, pointRadius: 3, spanGaps: false });
-  draw('c-pos', { type: 'line', data: { labels: L, datasets: chosen.map(c => line(pos, c)) }, options: { scales: { y: { reverse: true, min: 1, suggestedMax: Math.min(rows.length, 12), ticks: { stepSize: 1, precision: 0 } } } } });
-  draw('c-gap', { type: 'line', data: { labels: L, datasets: chosen.map(c => line(gap, c)) }, options: { scales: { y: { reverse: true, min: 0, title: { display: true, text: 'segundos' } } } } });
+  const line = (m, c) => ({ label: label(c), data: m.get(c.n), borderColor: color(c), backgroundColor: color(c), tension: .25, pointRadius: 3, spanGaps: false, clip: false });
+  const M = Math.max(3, ...chosen.flatMap(c => pos.get(c.n).filter(v => v !== null)));
+  const inside = ctx => ctx.tick.value >= 1 && ctx.tick.value <= M;          // 0 y M+1 son solo margen (sin linea ni numero)
+  draw('c-pos', { type: 'line', data: { labels: L, datasets: chosen.map(c => line(pos, c)) }, options: { layout: { padding: { top: 6, right: 8 } }, plugins: { legend: { labels: { padding: 14 } } },
+    scales: { y: { reverse: true, min: 0, max: M + 1, ticks: { stepSize: 1, autoSkip: false, callback: v => v >= 1 && v <= M ? v : '' }, grid: { color: ctx => inside(ctx) ? '#2a2a31' : 'transparent' } } } } });
+  draw('c-gap', { type: 'line', data: { labels: L, datasets: chosen.map(c => line(gap, c)) }, options: { layout: { padding: { top: 6, right: 8 } }, plugins: { legend: { labels: { padding: 14 } } },
+    scales: { y: { reverse: true, grace: '6%', ticks: { callback: v => v >= 0 ? v : '' }, grid: { color: ctx => ctx.tick.value >= 0 ? '#2a2a31' : 'transparent' }, title: { display: true, text: 'segundos' } } } } });
   // ganador por PE
   $('#win').innerHTML = `<thead><tr><th>PE</th><th>Ganador</th><th>Tiempo</th><th>Ventaja</th>${PES.some(p => p.distance_km) ? '<th>km/h</th>' : ''}</tr></thead><tbody>` + PES.map((p, i) => {
     const t = rows.map(c => ({ c, v: c.t[i] })).filter(x => isN(x.v)).sort((a, b) => a.v - b.v);
@@ -136,6 +152,14 @@ function onData(st) {
   const cs = [...new Set(ROWS.map(r => r.cat))].sort(); if (cs.join() !== CATS.join()) { CATS = cs; chips() }
   $('#upd').textContent = clock(st.last); render();
 }
+// Sponsors: los mismos de sponsors.js, en una sola franja chica (sin repetir marcas) para no cargar la pantalla.
+(function () {
+  const S = window.SPONSORS || {}, seen = new Set();
+  const uniq = a => (a || []).filter(x => { const k = String(x.name).toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true });
+  const one = x => { const i = x.logo ? `<img src="${esc(x.logo)}" alt="${esc(x.name)}" loading="lazy">` : `<span class="txt">${esc(x.name)}</span>`; return x.url ? `<a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${i}</a>` : i };
+  const top = uniq((S.top || []).slice(0, 4)), rest = uniq(S.bottom);
+  if (top.length || rest.length) $('#sponsors').innerHTML = `<h2 class="ttl">${esc(S.bottomTitle || 'Sponsors')}</h2>` + (top.length ? `<div class="sps t">${top.map(one).join('')}</div>` : '') + (rest.length ? `<div class="sps">${rest.map(one).join('')}</div>` : '');
+})();
 chips();
 try { const ev = await liveEvent(); if (ev) { $('#evname').textContent = ev.name; startLive(ev.id, onData) } else $('#evname').textContent = 'Sin evento en vivo' }
 catch (e) { console.error(e); $('#evname').textContent = 'No pudimos conectar con el servidor.' }
