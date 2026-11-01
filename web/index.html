@@ -143,10 +143,10 @@ function inscriptos() {
   const list = CREWS.filter(c => cat === 'all' || c.category === cat).sort((p, q) => p.car_number - q.car_number);
   $('#note').textContent = `${list.length} ${list.length === 1 ? 'tripulación inscripta' : 'tripulaciones inscriptas'}${cat === 'all' ? '' : ' en la categoría ' + cat}.`;
   if (!list.length) { $('#tbl').innerHTML = '<tbody><tr><td>Todavía no hay tripulaciones cargadas para este evento.</td></tr></tbody>'; return }
-  $('#tbl').innerHTML = `<thead><tr><th>Nro.</th><th>Nacionalidad</th><th>Piloto</th><th>Navegante</th><th>Vehículo</th><th>Categoría</th><th>Peña</th></tr></thead><tbody>${list.map(c => `<tr>
+  $('#tbl').innerHTML = `<thead><tr><th>Nro.</th><th>Nacionalidad</th><th>Piloto</th><th>Navegante</th><th>Piloto Inv.</th><th>Vehículo</th><th>Categoría</th><th>Peña</th></tr></thead><tbody>${list.map(c => `<tr>
     <td><span class="sp it num">${esc(c.car_number)}</span></td>
     <td>${flag(c.nationality || 'ar')}${c.co_driver ? flag(c.co_nationality || c.nationality || 'ar') : ''}</td>
-    <td class="font-semibold">${esc(c.driver)}</td><td>${esc(c.co_driver)}</td>
+    <td class="font-semibold">${esc(c.driver)}</td><td>${esc(c.co_driver)}</td><td>${esc(c.inv_driver)}</td>
     <td>${vehiculo(c.car_model)}</td>
     <td><span class="cat" style="display:inline-block;font-size:.9rem;font-style:italic;font-weight:800">${esc(c.category)}</span></td>
     <td style="color:var(--mu)">${esc(c.team)}</td></tr>`).join('')}</tbody>`;
