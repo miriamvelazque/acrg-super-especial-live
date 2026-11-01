@@ -1,12 +1,12 @@
 <div align="center">
-  <img src="web/assets/logo-rally-fueguino.png" alt="Rally Fueguino A.PI.TU.R." width="320">
+  <img src="web/assets/logo-acrg.jpg" alt="Automóvil Club Río Grande" width="240">
 
-  # Rally Fueguino Live Timing
+  # SÚPER ESPECIAL ACRG — Live Timing
 
-  **Cronometraje, clasificación y seguimiento en vivo para el rally fueguino.**
+  **Cronometraje y seguimiento en vivo del Automóvil Club Río Grande.**
 
   <p>
-    <img src="https://img.shields.io/badge/A.PI.TU.R.-Tierra%20del%20Fuego-00bfb5?style=for-the-badge" alt="A.PI.TU.R. — Tierra del Fuego">
+    <img src="https://img.shields.io/badge/ACRG-R%C3%ADo%20Grande-6EC7FF?style=for-the-badge" alt="Automóvil Club Río Grande">
     <img src="https://img.shields.io/badge/Frontend-HTML%20%7C%20JavaScript-8a2be2?style=for-the-badge" alt="Frontend HTML y JavaScript">
     <img src="https://img.shields.io/badge/Backend-Supabase-3ecf8e?style=for-the-badge" alt="Backend Supabase">
     <img src="https://img.shields.io/badge/Deploy-Vercel-111111?style=for-the-badge" alt="Despliegue en Vercel">
@@ -14,59 +14,70 @@
 
   <a href="web/index.html"><strong>Live Timing</strong></a>
   &nbsp;·&nbsp;
-  <a href="web/admin.html"><strong>Panel operativo</strong></a>
+  <a href="web/admin.html"><strong>Panel de cronometristas</strong></a>
 </div>
 
 ---
 
-Plataforma web de A.PI.TU.R. para cargar, validar y publicar los tiempos de cada prueba especial. Combina un panel de operación para el personal autorizado con una vista pública en vivo y clasificaciones.
+Aplicación web del **Automóvil Club Río Grande (ACRG)** para consultar las clasificaciones de la Súper Especial y cargar tiempos desde un panel privado. La web pública muestra los resultados aprobados; el personal autorizado ingresa al panel para cargar y gestionar tiempos.
 
 ## Contenido
 
-- [Experiencia y funcionalidades](#experiencia-y-funcionalidades)
+- [Funciones](#funciones)
 - [Tecnologías](#tecnologías)
-- [Estructura del proyecto](#estructura-del-proyecto)
-- [Puesta en marcha](#puesta-en-marcha)
+- [Estructura](#estructura)
+- [Configuración de Supabase](#configuración-de-supabase)
+- [Ejecución local](#ejecución-local)
+- [Despliegue](#despliegue)
 - [Operación](#operación)
-- [Seguridad y datos](#seguridad-y-datos)
-- [Sponsors](#sponsors)
+- [Datos y seguridad](#datos-y-seguridad)
 
-## Experiencia y funcionalidades
+## Funciones
 
-| Live Timing | Panel operativo |
-| --- | --- |
-| Clasificación general, por categoría y por etapa; inscriptos y resultados validados en tiempo real. | Carga de tiempos y penalizaciones, gestión de DNF, cola compartida y validación por rol. |
+### Live Timing
 
-También incluye:
+- Clasificación general acumulada y por categoría.
+- Vistas separadas por etapa y podio final por categoría.
+- Inscripciones con número, piloto, navegante, piloto invitado, vehículo, categoría y peña.
+- Banderas según nacionalidad del piloto y del navegante; si no se especifica, se muestra Argentina.
+- Actualización en vivo de resultados validados, con consulta periódica de respaldo si Realtime se desconecta.
+- Descarga en PDF de las vistas de clasificación.
+- Espacios reservados para sponsors y enlaces a información legal.
 
-- Tiempos almacenados en centésimas y cálculo neto automático.
-- Publicación controlada: un resultado aparece en el sitio público después de ser validado.
-- Nacionalidad de piloto y navegante, con banderas en la vista de inscriptos.
-- Marca y modelo del vehículo en la clasificación.
-- Historial de cargas, correcciones, validaciones, reaperturas y borrados.
-- Login del personal por nombre de usuario.
-- Configuración centralizada de marcas y espacios de sponsors.
+### Panel de cronometristas
+
+- Ingreso del personal por usuario y contraseña.
+- Carga de largada, llegada, penalización y estado DNF/abandono.
+- Cola compartida de tiempos, validación y reapertura según el rol.
+- Cola local de respaldo cuando no hay conexión; los tiempos pendientes se envían al recuperar internet.
+- Los usuarios con rol de comisario o administrador publican al guardar, porque `AUTO_VALIDAR` está activado en `web/admin.html`. El rol de cronometrista deja los tiempos pendientes para validación.
 
 ## Tecnologías
 
-- **Interfaz:** HTML, Tailwind CSS y JavaScript ES Modules.
+- **Interfaz:** HTML, Tailwind CSS y JavaScript con módulos ES.
 - **Datos, autenticación y tiempo real:** Supabase (PostgreSQL, Auth y Realtime).
 - **Hosting:** Vercel.
-La aplicación es estática y carga sus dependencias de interfaz desde CDN; no requiere un paso de compilación.
 
-## Estructura del proyecto
+Es un sitio estático, sin paso de compilación ni dependencias locales de Node. Tailwind, Supabase JS y las fuentes se cargan desde CDN.
+
+## Estructura
 
 ```text
 .
 ├── base_de_datos_sql/
+│   ├── 00_reset_proyecto_nuevo.sql
 │   ├── 01_schema.sql
 │   ├── 02_rls_auth.sql
-│   ├── 05_ensayo_seed.sql
-│   ├── 06_ensayo_cleanup.sql
 │   ├── 07_nueva_carrera_plantilla.sql
 │   ├── 08_login_por_usuario.sql
 │   ├── 09_nacionalidad_y_vehiculo.sql
-│   └── 10_trazabilidad.sql
+│   ├── 10_trazabilidad.sql
+│   ├── 11_evento_super_especial_acrg.sql
+│   ├── 12_inscriptos_super_especial_acrg.sql
+│   ├── 13_limpiar_pruebas_acrg.sql
+│   ├── 14_usuarios_acrg.sql
+│   ├── 15_piloto_invitado.sql
+│   └── 16_tiempos_etapa1_acrg.sql
 ├── web/
 │   ├── index.html
 │   ├── admin.html
@@ -74,81 +85,70 @@ La aplicación es estática y carga sus dependencias de interfaz desde CDN; no r
 │   ├── 03_public-live-timing.js
 │   ├── 04_admin-client.js
 │   ├── ranking.js
-│   ├── sponsors.js
+│   ├── footer.js
 │   └── assets/
+│       ├── logo-acrg.jpg
+│       └── brands/
 ├── vercel.json
 └── README.md
 ```
 
-## Puesta en marcha
+El logo oficial utilizado por la aplicación está en `web/assets/logo-acrg.jpg`. Los logos de fabricantes se guardan en `web/assets/brands/`; el nombre del archivo corresponde a la primera palabra del modelo (por ejemplo, `Ford Fiesta` usa `ford.png`). Si no existe un logo de fabricante, el modelo se muestra igualmente.
 
-### 1. Preparar Supabase
+## Configuración de Supabase
 
-En un proyecto Supabase, abre **SQL Editor** y ejecuta los scripts en este orden:
+En un proyecto Supabase nuevo, abre **SQL Editor** y ejecuta:
 
-1. `01_schema.sql` — crea el esquema, los roles, los triggers y el evento inicial.
-2. `02_rls_auth.sql` — habilita RLS, define permisos y agrega las tablas a Realtime.
-3. `08_login_por_usuario.sql` — habilita el acceso por nombre de usuario.
-4. `09_nacionalidad_y_vehiculo.sql` — añade la nacionalidad de piloto y navegante.
-5. `10_trazabilidad.sql` — registra quién validó un tiempo y mantiene el historial de cambios.
+1. `01_schema.sql`: crea tablas, tipos, funciones y triggers.
+2. `02_rls_auth.sql`: configura RLS, roles y las tablas de Realtime.
+3. `08_login_por_usuario.sql`: habilita el inicio de sesión con el nombre guardado en `staff_roles.display_name`.
+4. `09_nacionalidad_y_vehiculo.sql`: agrega nacionalidades de piloto y navegante.
+5. `10_trazabilidad.sql`: agrega metadatos de validación y el historial de cambios.
+6. `11_evento_super_especial_acrg.sql`: crea y activa el evento actual, con sus etapas y pruebas especiales.
+7. `15_piloto_invitado.sql`: agrega el campo de piloto invitado; debe ejecutarse antes de cargar inscriptos.
+8. `12_inscriptos_super_especial_acrg.sql`: carga las tripulaciones de este evento.
 
-Los scripts `08`, `09` y `10` son migraciones adicionales: ejecútalos después de `01` y `02`. El primero requiere que `staff_roles` ya tenga nombres de usuario (`display_name`) asignados.
+Para habilitar el panel:
 
-Para habilitar el acceso del personal:
+1. Crea las cuentas en **Supabase → Authentication → Users**.
+2. Edita `14_usuarios_acrg.sql` con los correos y nombres de usuario que correspondan y ejecútalo para asignar roles. No lo ejecutes sin revisar esos valores.
+3. El usuario escribe en el panel el `display_name` asignado. El inicio de sesión por nombre requiere `08_login_por_usuario.sql`; también se aceptan correos.
 
-1. Crea cada usuario en **Supabase → Authentication → Users**.
-2. Asigna su rol en `staff_roles`. El comentario final de `02_rls_auth.sql` incluye el ejemplo para crear el primer administrador.
-3. Para usar login por nombre, completa `display_name` con el nombre que ingresará en el panel.
-4. Carga las etapas, pruebas especiales y tripulaciones del evento. `07_nueva_carrera_plantilla.sql` sirve como plantilla editable para una nueva carrera.
-5. Asegúrate de que haya un solo evento con `is_live = true`.
+`16_tiempos_etapa1_acrg.sql` carga los tiempos publicados de las PE1 a PE3 de este evento. Ejecútalo solo si quieres importar esos resultados oficiales; al ejecutarlo inserta o actualiza las entradas correspondientes y las publica como validadas.
 
-### 2. Configurar el cliente
+### Precauciones con los scripts
 
-El cliente Supabase se inicializa en `web/03_public-live-timing.js`. Si vas a conectar otro proyecto, actualiza allí `SUPABASE_URL` y `SUPABASE_ANON_KEY` con los valores de **Project URL** y la clave publicable de Supabase.
+- **No ejecutes `00_reset_proyecto_nuevo.sql` sobre una base con datos que quieras conservar.** Borra todas las tablas, funciones y tipos del esquema `public`. Está destinado únicamente a preparar el proyecto nuevo del ACRG.
+- `13_limpiar_pruebas_acrg.sql` elimina los tiempos y el historial de prueba de las PE4 en adelante del evento indicado. Revisa que sea el momento adecuado antes de ejecutarlo.
+- `07_nueva_carrera_plantilla.sql` es una plantilla para preparar otra carrera; edita sus datos antes de usarla.
 
-La clave publicable puede estar en el código del navegador; **nunca** pongas una clave `service_role` en la web. La seguridad de los datos depende de mantener correctamente configuradas las políticas RLS.
+El cliente Supabase está configurado en `web/03_public-live-timing.js`. Para conectar otro proyecto, cambia allí `SUPABASE_URL` y `SUPABASE_ANON_KEY` por los valores de Supabase. La clave publicable puede usarse en el navegador; nunca expongas una clave `service_role`. La protección de los datos depende de las políticas RLS.
 
-### 3. Probar localmente
+## Ejecución local
 
-Sirve la carpeta `web/` con un servidor HTTP local y abre `index.html`. Como la aplicación usa módulos JavaScript, no la abras directamente como archivo `file://`.
+Desde la raíz del proyecto, inicia un servidor HTTP estático que sirva `web/`, por ejemplo:
 
-### 4. Desplegar en Vercel
+```bash
+python -m http.server 8000 --directory web
+```
 
-1. Importa el repositorio en Vercel.
-2. Configura **Root Directory** como `web`.
-3. Despliega como sitio estático, sin comando de build.
+Luego abre `http://localhost:8000`. No abras `index.html` directamente con `file://`, porque la aplicación utiliza módulos JavaScript.
 
-La configuración de URLs limpias está en `vercel.json`.
+## Despliegue
+
+En Vercel, configura el repositorio como raíz del proyecto, selecciona el framework **Other**, deja vacío el comando de build y establece `web` como directorio de salida. `vercel.json` contiene la opción `cleanUrls`.
 
 ## Operación
 
-### Cronometristas
+- **Público y prensa:** consulta las clasificaciones desde [Live Timing](web/index.html). Solo se publican resultados validados; las horas originales de largada y llegada no se exponen.
+- **Cronometristas:** ingresa al [panel](web/admin.html), selecciona la PE y el auto, y carga los tiempos. Si no hay conexión, las entradas quedan en la cola local del dispositivo.
+- **Comisarios y administradores:** revisa la cola, valida o reabre los tiempos. Al reabrir uno, deja de aparecer en la clasificación pública hasta que vuelva a validarse.
 
-Entra al [panel operativo](web/admin.html), selecciona evento y PE, indica el auto y carga largada, llegada y penalización cuando corresponda. La interfaz admite DNF/abandono. Los tiempos se guardan como pendientes de validación.
+## Datos y seguridad
 
-### Comisarios
-
-Revisa la cola de carga y valida las entradas aprobadas. Si una entrada necesita corrección, puede reabrirla; al hacerlo, deja de publicarse hasta una nueva validación.
-
-### Público y prensa
-
-Consulta el [Live Timing](web/index.html) para las clasificaciones. Solo se exponen resultados validados; las horas originales de largada y llegada permanecen privadas.
-
-## Seguridad y datos
-
-- Los tiempos originales se guardan en `time_entries`; los resultados públicos se publican en `results` mediante triggers.
-- RLS separa el acceso público al catálogo y los resultados del acceso autenticado a los tiempos y funciones operativas.
-- Los roles disponibles son `timekeeper`, `commissioner` y `admin`.
-- `time_entries_log` conserva las acciones y sus valores anteriores y nuevos. La vista `v_historial_tiempos` facilita consultar el historial; solo comisarios y administradores pueden leerlo.
-- Las horas y los resultados se guardan en centésimas. El cálculo es `llegada - largada + penalización`. Un DNF no suma tiempo ni participa del ordenamiento.
-
-## Sponsors
-
-Edita `web/sponsors.js` para agregar o modificar marcas. Guarda sus logos en `web/assets/sponsors/` y actualiza las listas `top` o `bottom`, incluyendo nombre, archivo y, opcionalmente, URL.
-
-## Scripts de ensayo
-
-- `05_ensayo_seed.sql` crea un evento de prueba, carga datos de ejemplo y cambia cuál evento está en vivo.
-- `06_ensayo_cleanup.sql` elimina eventos cuyo nombre comienza con `ENSAYO`.
-
-Úsalos solo cuando corresponda y revisa sus efectos antes de ejecutarlos en una base con datos reales.
+- `time_entries` almacena las horas originales y los datos de operación; los tiempos se representan en centésimas.
+- El resultado neto se calcula como `llegada - largada + penalización`. Los DNF no suman tiempo ni participan del ordenamiento.
+- `results` contiene los resultados publicados. Un trigger los actualiza al validar un tiempo y los retira al reabrirlo.
+- Las políticas RLS separan la lectura pública del catálogo y los resultados del acceso del personal a las cargas y funciones operativas.
+- Los roles son `timekeeper`, `commissioner` y `admin`.
+- `time_entries_log` registra cargas, correcciones, validaciones, reaperturas y borrados desde que se instala `10_trazabilidad.sql`. La vista `v_historial_tiempos` facilita consultar ese historial; solo comisarios y administradores pueden leerlo.
