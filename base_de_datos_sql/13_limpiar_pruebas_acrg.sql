@@ -5,5 +5,6 @@ where special_stage_id in (
   select ss.id from special_stages ss join events e on e.id = ss.event_id
   where e.name = 'SÚPER ESPECIAL - ACRG');
 
+truncate public.time_entries_log;
 -- Verificación: ambas deben dar 0.
 select (select count(*) from time_entries) as time_entries, (select count(*) from results) as results;
