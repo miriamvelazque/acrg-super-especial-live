@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SÚPER ESPECIAL - Carga de tiempos</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;1,700;1,800&family=Barlow:wght@400;500;600&family=Orbitron:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+:root{--bg:#0B0B0B;--panel:#141417;--line:#2a2a31;--cy:#6EC7FF;--vi:#1F6FD6;--mu:#b4b4bd;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--bg);color:#fff;font-family:Barlow,system-ui,sans-serif;margin:0}
+.sp{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-style:normal;font-weight:800}
+.ttl{font-family:Orbitron,'Barlow Condensed',sans-serif;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+.logo{height:4rem;width:4rem;max-width:100%;display:block;border-radius:50%;background:#fff;object-fit:contain}
+.hero{background:linear-gradient(100deg,#0B0B0B 30%,#0d2a4d 100%);border-bottom:3px solid var(--cy)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:.6rem;padding:1rem}
+label{display:block;font-size:.85rem;color:var(--mu);margin-bottom:.25rem;font-weight:600}
+input,select{width:100%;background:#0B0B0B;color:#fff;border:1px solid #3a3a43;border-radius:.4rem;padding:.7rem;font-size:1.15rem;font-variant-numeric:tabular-nums}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--cy);outline-offset:1px}
+.btn{border-radius:.4rem;padding:.8rem 1.2rem;font-weight:700;font-size:1.1rem;cursor:pointer;border:1px solid var(--line);background:transparent;color:#fff}
+.go{background:var(--cy);color:#001526;border-color:var(--cy)}
+.res{font-size:3.2rem;line-height:1;color:var(--cy);font-style:italic}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+td,th{padding:.5rem;border-top:1px solid var(--line);text-align:left;white-space:nowrap}
+th{font-size:.8rem;color:var(--mu)}
+/* Campo de contraseña con boton para mostrar/ocultar */
+.pw{position:relative}
+.pw input{padding-right:3.2rem}
+.eye{position:absolute;right:.35rem;top:50%;transform:translateY(-50%);width:2.4rem;height:2.4rem;display:flex;align-items:center;justify-content:center;background:transparent;border:0;border-radius:.4rem;font-size:1.35rem;line-height:1;cursor:pointer;color:#fff}
+.eye:hover{transform:translateY(-50%) scale(1.15)}
+.dot{width:.7rem;height:.7rem;border-radius:50%;color:var(--cy);background:currentColor;box-shadow:0 0 0 0 currentColor;animation:pl 2s infinite;flex:none}
+.dot-lg{width:1.15rem;height:1.15rem}
+.dot.off{color:#ff4d4d}
+@keyframes pl{70%{box-shadow:0 0 0 .8rem transparent}100%{box-shadow:0 0 0 0 transparent}}
+@media (prefers-reduced-motion:reduce){.dot{animation:none}}
+::placeholder{color:#7d7d88;opacity:1}
+/* Cola de carga: columnas fijas para que Sin validar / Validado no muevan nada */
+#qt{table-layout:fixed;min-width:54rem}
+#qt td,#qt th{overflow:hidden;text-overflow:ellipsis;text-align:center}
+#qt th:nth-child(3),#qt td:nth-child(3){text-align:left;padding-left:1.5rem}
+#qt td:nth-child(3){white-space:normal;text-overflow:clip}
+#qt .col-st{text-align:center}
+.st{display:flex;align-items:center;justify-content:center;gap:.6rem}
+.st-t{display:inline-block;width:6.5rem;text-align:center}
+.vbtn{width:6.2rem;padding:.25rem 0;font-size:.9rem}
+.vbtn.pend{background:#ff9f43;border-color:#ff9f43;color:#1a0f00}
+[hidden]{display:none!important}
+.err{color:#ff6b81;font-size:.9rem;min-height:1.2rem}
+</style>
+</head>
+<body>
+<header class="hero"><div class="max-w-5xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-3">
+  <div class="flex items-center gap-4"><img class="logo" src="assets/logo-acrg.jpg" alt="Automóvil Club Río Grande" width="720" height="720">
+  <div><h1 class="ttl text-lg md:text-2xl m-0 leading-tight">Carga de tiempos</h1>
+  <p class="m-0 mt-1 text-sm" style="color:var(--cy)">Panel de cronometristas, ACRG</p></div></div>
+  <div id="hdr" class="flex flex-wrap items-center gap-4" hidden>
+    <div id="who" class="text-sm font-semibold" style="color:var(--cy)">Conectado</div>
+    <div class="leading-tight text-right" aria-live="polite">
+      <div class="flex items-center justify-end gap-2 font-semibold"><span id="ndot" class="dot dot-lg"></span><span id="nst">En vivo</span></div>
+      <div id="upd" class="text-xs mt-1" style="color:var(--mu)">Última actualización: --:--:--</div>
+    </div>
+    <button class="btn" id="so">Salir</button>
+  </div>
+</div></header>
+
+<section id="login" class="max-w-sm mx-auto px-4 py-10"><div class="card"><h2 class="ttl text-lg m-0 mb-3">Ingreso de personal</h2>
+<label for="luser">Usuario</label><input id="luser" type="text" autocomplete="username" autocapitalize="words" spellcheck="false"><label for="lpass" class="mt-3">Contraseña</label><div class="pw"><input id="lpass" type="password" autocomplete="current-password"><button type="button" class="eye" id="lpw" aria-label="Mostrar contraseña" title="Mostrar contraseña" aria-pressed="false">🙈</button></div>
+<div class="err" id="lerr" role="alert"></div><button class="btn go sp mt-2" id="lgo">Ingresar</button></div></section>
+<main id="app" hidden class="max-w-5xl mx-auto px-4 py-5 grid gap-4 md:grid-cols-2">
+  <section class="card" aria-label="Carga">
+    <div class="grid grid-cols-2 gap-2 mb-3">
+      <div><label for="ev">Evento</label><select id="ev"><option>2ª fecha · Súper Especial</option></select></div>
+      <div><label for="pe">PE</label><select id="pe"></select></div>
+    </div>
+        <div class="grid grid-cols-3 gap-2 mb-1">
+      <div><label for="n">N° de auto</label><input id="n" list="autos" inputmode="numeric" placeholder="000" autocomplete="off"></div>
+      <div class="col-span-2 flex items-end pb-3 text-sm" id="crew" style="color:var(--mu)">Ingresá el número de auto</div>
+    </div>
+    <datalist id="autos"></datalist>
+    <div class="grid grid-cols-2 gap-2 mb-3">
+      <div><label for="s">Hora de largada (HH:MM)</label><input id="s" placeholder="00:00" inputmode="numeric" autocomplete="off"></div>
+      <div><label for="e">Hora de llegada (HH:MM:SS,cc)</label><input id="e" placeholder="00:00:00,00" inputmode="numeric" autocomplete="off"></div>
+      <div><label for="p">Penalización (MM:SS)</label><input id="p" placeholder="00:00" inputmode="numeric" autocomplete="off"></div>
+      <div class="flex items-end pb-3"><label class="flex items-center gap-2 m-0 text-base" style="color:#fff"><input id="dnf" type="checkbox" style="width:1.4rem;height:1.4rem"> DNF / Abandono</label></div>
+    </div>
+    <p class="text-xs" style="color:var(--mu);margin:0 0 .4rem">Escribí solo números: 1400 → 14:00 · 14035225 → 14:03:52,25</p>
+    <div class="err" id="err" role="alert"></div>
+    <div class="text-sm" id="ok" style="color:var(--cy);min-height:1.2rem" aria-live="polite"></div>
+    <div class="flex gap-2 mt-2"><button class="btn go sp" id="save">Guardar tiempo</button><button class="btn" id="ex" type="button">Cargar ejemplo</button></div>
+  </section>
+
+  <section class="card flex flex-col justify-between" aria-live="polite">
+    <div>
+      <p class="m-0 text-sm" style="color:var(--mu)">Tiempo de PE calculado</p>
+      <div class="res sp my-2" id="out">--:--.--</div>
+      <p class="m-0 text-sm" id="formula" style="color:var(--mu)">Llegada - largada + penalización</p>
+    </div>
+    <p class="text-xs mt-6 mb-0" style="color:var(--mu)">El público solo ve el tiempo neto, nunca las horas de largada y llegada. Un DNF no suma tiempo y queda fuera del ordenamiento.</p>
+  </section>
+
+  <section class="card md:col-span-2" aria-label="Cola de carga">
+    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+      <h2 class="ttl text-lg m-0">Cola de carga</h2>
+      <button class="btn" id="sync">Sincronizar pendientes</button>
+    </div>
+    <div class="overflow-x-auto"><table id="qt"><colgroup><col style="width:4.5rem"><col style="width:4.5rem"><col><col style="width:7.5rem"><col style="width:5.5rem"><col style="width:6.5rem"><col style="width:15rem"></colgroup><thead><tr><th>PE</th><th>Auto</th><th>Tripulación</th><th>Tiempo PE</th><th>Penal.</th><th>Cargado</th><th class="col-st">Estado</th></tr></thead><tbody id="log"></tbody></table></div>
+    <p id="empty" class="text-sm" style="color:var(--mu)">Todavía no cargaste tiempos. Completá el formulario y guardá.</p>
+  </section>
+</main>
+
+<script src="footer.js"></script>
+<script type="module">
+import { sb, state, loadSnapshot, liveEvent, clock } from './03_public-live-timing.js';
+import { signIn, signOut, onAuth, myRole, saveEntry, validateEntry, watchEntries, loadStages } from './04_admin-client.js';
+const $=s=>document.getElementById(s);
+let CREW={},BYNUM={};
+const p2=v=>String(v).padStart(2,'0');
+const fmt=x=>{const m=Math.floor(x/6000),s=Math.floor(x/100)%60,c=x%100;return m+':'+p2(s)+'.'+p2(c)};
+// Todo se calcula en centésimas para evitar errores de punto flotante.
+function parseStart(v){const m=/^(\d{1,2}):(\d{2})$/.exec(v.trim());if(!m||+m[1]>23||+m[2]>59)return null;return (+m[1]*3600+ +m[2]*60)*100}
+function parseEnd(v){const m=/^(\d{1,2}):(\d{2}):(\d{2})[,.](\d{2})$/.exec(v.trim());if(!m||+m[1]>23||+m[2]>59||+m[3]>59)return null;return (+m[1]*3600+ +m[2]*60+ +m[3])*100+ +m[4]}
+function parsePen(v){if(!v.trim())return 0;const m=/^(\d{1,2}):(\d{2})$/.exec(v.trim());if(!m||+m[2]>59)return null;return (+m[1]*60+ +m[2])*100}
+
+function calc(){
+  const n=$('n').value.trim();$('crew').textContent=CREW[n]||(n?'Auto no inscripto':'Ingresá el número de auto');
+  if($('dnf').checked){$('out').textContent='DNF';$('formula').textContent='No suma tiempo y queda fuera del ordenamiento.';return {dnf:true}}
+  const s=parseStart($('s').value),e=parseEnd($('e').value),p=parsePen($('p').value);
+  let msg='',t=null;
+  if($('s').value.length>=5&&s==null)msg='Largada inválida: usá HH:MM (ej. 10:15).';
+  else if($('e').value.length>=11&&e==null)msg='Llegada inválida: usá HH:MM:SS,cc (ej. 10:25:41,30).';
+  else if(p==null){if($('p').value.length>=5)msg='Penalización inválida: usá MM:SS (ej. 00:10).'}
+  else if(s!=null&&e!=null){if(e<=s)msg='La llegada debe ser posterior a la largada.';else t=e-s+p}
+  $('err').textContent=msg;
+  $('out').textContent=t==null?'--:--.--':fmt(t);
+  $('formula').textContent=t==null?'Llegada - largada + penalización':`${fmt(e-s)} neto + ${fmt(p)} penalización`;
+  return {t,pen:p,msg,s,e};
+}
+// Mascara: se tipean solo digitos y se insertan : y , solos. Sin separador final, asi el borrado funciona normal.
+const MASK={s:{g:[2,2],sep:[':']},p:{g:[2,2],sep:[':']},e:{g:[2,2,2,2],sep:[':',':',',']}};
+function applyMask(id){
+  const {g,sep}=MASK[id],el=$(id),d=el.value.replace(/\D/g,'').slice(0,g.reduce((a,b)=>a+b,0));
+  let out='',i=0;
+  g.forEach((n,k)=>{const part=d.slice(i,i+n);if(part)out+=(k?sep[k-1]:'')+part;i+=n});
+  el.value=out;
+}
+['n','s','e','p','dnf'].forEach(id=>$(id).addEventListener('input',()=>{if(MASK[id])applyMask(id);$('err').textContent='';$('ok').textContent='';calc()}));
+$('ex').onclick=()=>{$('n').value='733';$('s').value='10:15';$('e').value='10:25:41,30';$('p').value='00:10';$('dnf').checked=false;calc()};
+
+let PES=[],EV=null,ROLE=null,ENTRIES=[],stop=null,Q=[],ONLINE=navigator.onLine,pingT=null;
+try{Q=JSON.parse(localStorage.getItem('rf-queue')||'[]')}catch{}
+const saveQ=()=>{try{localStorage.setItem('rf-queue',JSON.stringify(Q))}catch{}};
+const esc=s=>String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const canValidate=()=>['commissioner','admin'].includes(ROLE?.role);
+// AUTO_VALIDAR = true: al guardar, un usuario comisario/admin publica el tiempo al instante (sin tocar "Validar").
+// Poner false para volver al flujo original (cronometrista carga, comisario valida).
+const AUTO_VALIDAR=true;
+async function saveAndPublish(e){const row=await saveEntry(e);if(AUTO_VALIDAR&&canValidate()&&row&&!row.validated){const {error}=await validateEntry(row.id,true);if(error)throw new Error(error.message)}return row}
+const isNet=e=>!navigator.onLine||/fetch|network/i.test(e.message);
+const ROLES={timekeeper:'Cronometrista',commissioner:'Comisario',admin:'Administrador'};
+function paintWho(){const n=ROLE?.display_name||ROLES[ROLE?.role]||'';$('who').textContent=n?`Conectado: ${n}`:'Conectado'}
+function paintNet(){$('ndot').classList.toggle('off',!ONLINE);const t=$('nst');t.textContent=ONLINE?'En vivo':'Off line';t.style.color=ONLINE?'':'#ff6b6b'}
+// Al volver la conexion se envian solos los tiempos que quedaron pendientes.
+function setOnline(v){const was=ONLINE;ONLINE=v;paintNet();if(v&&!was)flush()}
+// Aviso de red: evento del navegador + prueba real contra Supabase cada 12 s (hay senal pero sin datos tambien cuenta como Off line).
+async function ping(){
+  if(!ROLE)return;
+  if(!navigator.onLine){setOnline(false);return}
+  try{
+    const r=await Promise.race([sb.from('events').select('id').limit(1),new Promise((_,no)=>setTimeout(()=>no(new Error('timeout')),8000))]);
+    setOnline(!(r.error&&/fetch|network/i.test(r.error.message)));
+  }catch{setOnline(false)}
+}
+function paintUpd(){const ms=ENTRIES.reduce((m,r)=>Math.max(m,Date.parse(r.updated_at)||0),0);$('upd').textContent='Última actualización: '+clock(ms)}
+const qlabel=()=>{$('sync').textContent=Q.length?`Sincronizar pendientes (${Q.length})`:'Sincronizar pendientes'};
+
+function fillPE(){
+  const byN=new Map(PES.map(p=>[p.number,p])),max=Math.max(8,...byN.keys());
+  let h='';
+  for(let n=1;n<=max;n++){const p=byN.get(n);
+    h+=p?`<option value="${p.id}">${esc(p.name)}${p.stages?.number?' · Etapa '+p.stages.number:''}</option>`
+        :`<option value="">PE${n} (todavía no creada en la base)</option>`}
+  $('pe').innerHTML=h;peWarn();
+}
+const NOPE='Esa PE todavía no está creada en la base: pedile al administrador que la cree.';
+function peWarn(){$('err').textContent=$('pe').value?'':NOPE}
+$('pe').onchange=peWarn;
+
+async function init(){
+  ROLE=await myRole();
+  if(!ROLE){$('lerr').textContent='Tu usuario no tiene permisos de cronometrista.';await signOut();return}
+  EV=await liveEvent();
+  if(!EV){$('lerr').textContent='No hay un evento en vivo.';return}
+  await loadSnapshot(EV.id);
+  PES=await loadStages(EV.id);
+  CREW={};BYNUM={};
+  for(const c of state.crews.values()){BYNUM[c.car_number]=c;CREW[c.car_number]=`${c.driver} / ${c.co_driver||''} (${c.category})`}
+  $('autos').innerHTML=Object.keys(CREW).map(k=>`<option value="${k}">${esc(CREW[k])}</option>`).join('');
+  fillPE();
+  $('login').hidden=true;$('app').hidden=false;$('hdr').hidden=false;paintWho();paintNet();
+  await refresh();stop?.();stop=watchEntries(refresh);qlabel();calc();
+  clearInterval(pingT);pingT=setInterval(ping,12000);ping();if(Q.length)flush();
+}
+function hidePw(){const i=$('lpass'),b=$('lpw');i.type='password';b.textContent='🙈';b.setAttribute('aria-pressed','false');b.setAttribute('aria-label','Mostrar contraseña');b.title='Mostrar contraseña'}
+function showLogin(){EV=null;ROLE=null;stop?.();hidePw();$('login').hidden=false;$('app').hidden=true;$('hdr').hidden=true;clearInterval(pingT)}
+
+async function refresh(){
+  if(!PES.length){ENTRIES=[];draw();return}
+  const {data,error}=await sb.from('time_entries').select('*').in('special_stage_id',PES.map(p=>p.id))
+    .order('updated_at',{ascending:false}).limit(100);
+  if(error){if(/fetch|network/i.test(error.message))setOnline(false);else $('err').textContent=error.message;return}
+  setOnline(true);ENTRIES=data;draw();
+}
+function draw(){
+  const pn=id=>esc(PES.find(p=>p.id===id)?.name);
+  // Celda de estado de ancho fijo: el texto y el boton ocupan siempre el mismo lugar.
+  const stCell=(txt,color,btn)=>`<td class="col-st"><div class="st"><span class="st-t" style="color:${color}">${txt}</span>${btn||''}</div></td>`;
+  const row=(pe,c,t,pen,when,st)=>{const who=c?esc(c.driver+' / '+(c.co_driver||'')):'';return `<tr><td>${pe}</td><td class="sp text-lg">${c?c.car_number:''}</td><td title="${who}">${who}</td><td class="sp text-lg" style="color:var(--cy)">${t}</td><td>${pen?fmt(pen):'-'}</td><td>${when}</td>${st}</tr>`};
+  const queued=Q.map(q=>row(pn(q.special_stage_id),state.crews.get(q.crew_id),q.status==='dnf'?'DNF':fmt(q.finish_cs-q.start_cs+q.penalty_cs),q.penalty_cs,'-',stCell('Sin enviar','#ff6b81')));
+  const sent=ENTRIES.map(r=>row(pn(r.special_stage_id),state.crews.get(r.crew_id),r.status==='dnf'?'DNF':fmt(r.net_cs),r.penalty_cs,new Date(r.updated_at).toLocaleTimeString('es-AR',{hourCycle:'h23',timeZone:'America/Argentina/Ushuaia'}),
+    stCell(r.validated?'Validado':'Sin validar',r.validated?'var(--cy)':'#ff9f43',
+      canValidate()?`<button class="btn vbtn${r.validated?'':' pend'}" data-v="${r.id}" data-on="${!r.validated}">${r.validated?'Reabrir':'Validar'}</button>`:'')));
+  $('empty').style.display=queued.length+sent.length?'none':'block';
+  $('log').innerHTML=queued.concat(sent).join('');
+  paintUpd();
+}
+$('log').onclick=async e=>{const b=e.target.closest('[data-v]');if(!b)return;
+  const {error}=await validateEntry(b.dataset.v,b.dataset.on==='true');
+  if(error)$('err').textContent=error.message;else refresh()};
+
+$('save').onclick=async()=>{
+  const c=BYNUM[$('n').value.trim()],r=calc();
+  if(!$('pe').value){$('err').textContent=NOPE;return}
+  if(!c){$('err').textContent='Elegí un número de auto inscripto.';return}
+  if(!r.dnf&&r.t==null){$('err').textContent=r.msg||'Completá largada y llegada.';return}
+  const entry={special_stage_id:$('pe').value,crew_id:c.id,status:r.dnf?'dnf':'ok',start_cs:r.s,finish_cs:r.e,penalty_cs:r.pen||0};
+  let note='',ok='';
+  try{await saveAndPublish(entry);ok=`Tiempo guardado: auto ${c.car_number} · ${$('pe').selectedOptions[0].textContent}`;setOnline(true)}
+  catch(e){
+    if(!isNet(e)){$('err').textContent=e.message;return}
+    Q.push(entry);saveQ();qlabel();setOnline(false);note='Sin conexión: el tiempo quedó guardado en este dispositivo y se enviará al sincronizar.';
+  }
+  // Reseteo del formulario: vacio, asi vuelven a verse los ceros grises (placeholder) y se destilda DNF.
+  ['n','s','e','p'].forEach(id=>$(id).value='');$('dnf').checked=false;calc();
+  $('err').textContent=note;$('ok').textContent=ok;   // despues de calc(), que limpia el mensaje de error
+  if(navigator.onLine)await refresh();else draw();$('n').focus();
+};
+async function flush(){
+  if(!ROLE||!Q.length)return;
+  const rest=[];
+  for(const q of Q){try{await saveAndPublish(q)}catch(e){rest.push(q);if(isNet(e))setOnline(false);$('err').textContent=isNet(e)?'Sin conexión: quedan pendientes.':e.message}}
+  Q=rest;saveQ();qlabel();await refresh();
+}
+$('sync').onclick=flush;addEventListener('online',ping);addEventListener('offline',()=>setOnline(false));
+
+$('lpw').onclick=()=>{const i=$('lpass'),b=$('lpw'),ver=i.type==='password';i.type=ver?'text':'password';b.textContent=ver?'👁️':'🙈';b.setAttribute('aria-pressed',String(ver));b.setAttribute('aria-label',ver?'Ocultar contraseña':'Mostrar contraseña');b.title=b.getAttribute('aria-label');i.focus()};
+$('lgo').onclick=async()=>{$('lerr').textContent='';const pw=$('lpass').value;hidePw();try{await signIn($('luser').value,pw)}catch(e){$('lerr').textContent=e.message}};
+$('so').onclick=()=>signOut();
+['luser','lpass'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter')$('lgo').click()}));
+// Importante: no llamar a supabase directo dentro del callback de auth (puede bloquearse); por eso el setTimeout.
+onAuth(s=>setTimeout(()=>{if(!s)showLogin();else if(!EV)init().catch(e=>{$('lerr').textContent=e.message})},0));
+
+calc();draw();paintNet();
+</script>
+</body>
+</html>
