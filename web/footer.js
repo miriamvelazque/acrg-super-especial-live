@@ -1,7 +1,16 @@
 // Pie de pagina compartido. Completa CONTACTO (whatsapp, facebook, instagram, email): lo que quede vacio no se muestra.
 (() => {
-  const C = { whatsapp: '', facebook: 'acrg.tierradelfuego.1', facebookLabel: 'Acrg Tierra del Fuego', instagram: '@acrgtierradel', email: '', org: 'Automóvil Club Río Grande.', year: 2026, legal: 'legal.html',
-    linkedin: 'https://www.linkedin.com/in/miriam-alicia-velazque' };
+  const C = { 
+    whatsapp: '5492964509725', 
+    facebook: 'acrg.tierradelfuego.1', 
+    facebookLabel: 'Acrg Tierra del Fuego', 
+    instagram: '@acrgtierradel', 
+    email: '', 
+    org: 'Automóvil Club Río Grande.', 
+    year: 2026, 
+    legal: 'legal.html',
+    linkedin: 'https://www.linkedin.com/in/miriam-alicia-velazque' 
+  };
   const st = 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
   const I = {
     wa: `<svg width="22" height="22" viewBox="0 0 24 24" ${st}><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2z"/><path d="M8.5 9c.5 3 3 5.5 6 6l1.5-1.5-2-1-1 .8c-1-.5-2-1.500-2.500-2.500l.8-1-1-2z"/></svg>`,
@@ -29,7 +38,18 @@
     ${contact ? `<div class="row">${contact}</div>` : ''}
     <nav class="row" aria-label="Información legal"><a href="${C.legal}#aviso">Aviso sobre resultados</a><a href="${C.legal}#terminos">Términos de uso</a><a href="${C.legal}#privacidad">Privacidad</a><a href="${C.legal}#cookies">Cookies</a></nav>
     <hr>
-    <div class="row" style="align-items:center"><span>© ${C.year} Súper Especial — ${C.org} Todos los derechos reservados.</span><span class="sep" aria-hidden="true">|</span>
-      <span style="display:inline-flex;align-items:center;gap:.6rem">Diseñado y desarrollado por Miriam Velazque (+54) 92964509725 <a href="${C.linkedin}" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn de Miriam Velazque">${I.li}</a></span></div></div>`;
+    <div class="row" style="align-items:center">
+      <span>© ${C.year} Súper Especial — ${C.org} Todos los derechos reservados.</span>
+      <span class="sep" aria-hidden="true">|</span>
+      <span style="display:inline-flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:center">
+        Diseñado y desarrollado por Miriam Velazque | 
+        <a href="https://wa.me/${digits(C.whatsapp)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:.3rem"><span style="display:inline-flex">${I.wa}</span> (+54) 92964509725</a> 
+        <a href="${C.linkedin}" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn de Miriam Velazque">${I.li}</a>
+        <span class="sep" aria-hidden="true">|</span> 
+        👁️ Visitas: <strong id="contador-visitas" style="color:#6EC7FF">--</strong>
+        <span class="sep" aria-hidden="true">|</span> 
+        🟢 Conectados: <strong id="usuarios-conectados" style="color:#10B981">--</strong>
+      </span>
+    </div></div>`;
   document.body.appendChild(f);
 })();

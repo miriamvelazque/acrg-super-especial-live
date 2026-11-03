@@ -70,3 +70,46 @@ export async function liveEvent() {
   if (error) throw error;
   return data;
 }
+
+// --- CONTADOR DE VISITAS TOTALES ---
+export async function registrarVisita() {
+  try {
+    const { data: totalViews, error } = await sb.rpc('increment_views', { page_id: 'home' });
+    if (!error && totalViews !== null) {
+      const elContador = document.getElementById('contador-visitas');
+      if (elContador) {
+        elContador.innerText = Number(totalViews).toLocaleString('es-AR');
+      }
+    }
+  } catch (err) {
+    console.error('Error al registrar la visita:', err);
+  }
+}
+
+// --- CONTADOR DE USUARIOS CONECTADOS EN VIVO (Presence) ---
+export function iniciarContadorEnVivo() {
+  const canalPresencia = sb.channel('acrg-live-presence');
+
+  canalPresencia
+    .on('presence', { event: 'sync' }, () => {
+      const state = canalPresencia.presenceState();
+      const totalConectados = Object.keys(state).length;
+      const elConectados = document.getElementById('usuarios-conectados');
+      if (elConectados) {
+        elConectados.innerText = Math.max(1, totalConectados).toLocaleString('es-AR');
+      }
+    })
+    .subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        await canalPresencia.track({ online_at: new Date().toISOString() });
+      }
+    });
+}
+
+// Ejecutar automáticamente al cargar la página
+if (typeof window !== 'undefined') {
+  window.addEventListener('DOMContentLoaded', () => {
+    registrarVisita();
+    iniciarContadorEnVivo();
+  });
+}
