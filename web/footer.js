@@ -30,6 +30,6 @@
     <nav class="row" aria-label="Información legal"><a href="${C.legal}#aviso">Aviso sobre resultados</a><a href="${C.legal}#terminos">Términos de uso</a><a href="${C.legal}#privacidad">Privacidad</a><a href="${C.legal}#cookies">Cookies</a></nav>
     <hr>
     <div class="row" style="align-items:center"><span>© ${C.year} Súper Especial — ${C.org} Todos los derechos reservados.</span><span class="sep" aria-hidden="true">|</span>
-      <span style="display:inline-flex;align-items:center;gap:.6rem">Diseñado y desarrollado por MAVA <a href="${C.linkedin}" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn de MAVA">${I.li}</a></span></div></div>`;
+      <span style="display:inline-flex;align-items:center;gap:.6rem">Diseñado y desarrollado por Miriam Velazque - (+54) 9 2964 509725 <a href="${C.linkedin}" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn de Miriam Velazque">${I.li}</a></span></div></div>`;
   document.body.appendChild(f);
 })();
