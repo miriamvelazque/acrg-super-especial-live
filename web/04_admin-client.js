@@ -34,10 +34,11 @@ export async function myRole() {
 
 // Valores en centesimas (los que ya calculan los parsers del formulario).
 // Un DNF no lleva horas: se guarda sin tiempo y nunca suma ni ordena.
-export async function saveEntry({ special_stage_id, crew_id, start_cs, finish_cs, penalty_cs = 0, status = 'ok' }) {
+export async function saveEntry({ special_stage_id, crew_id, start_cs, finish_cs, penalty_cs = 0, status = 'ok', penalty_reason = null }) {
   if (!special_stage_id) throw new Error('Esa PE todavía no está creada en la base de datos.');
   const row = { special_stage_id, crew_id, penalty_cs, status,
-    start_cs: status === 'ok' ? start_cs : null, finish_cs: status === 'ok' ? finish_cs : null };
+    start_cs: status === 'ok' ? start_cs : null, finish_cs: status === 'ok' ? finish_cs : null,
+    penalty_reason: status === 'ok' && penalty_cs > 0 ? (penalty_reason || null) : null };
   const { data, error } = await sb.from('time_entries')
     .upsert(row, { onConflict: 'special_stage_id,crew_id' }).select().single();
   if (error) {

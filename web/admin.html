@@ -84,6 +84,10 @@ th{font-size:.8rem;color:var(--mu)}
       <div><label for="p">Penalización (MM:SS)</label><input id="p" placeholder="00:00" inputmode="numeric" autocomplete="off"></div>
       <div class="flex items-end pb-3"><label class="flex items-center gap-2 m-0 text-base" style="color:#fff"><input id="dnf" type="checkbox" style="width:1.4rem;height:1.4rem"> DNF / Abandono</label></div>
     </div>
+    <div id="motrow" class="grid grid-cols-2 gap-2 mb-3" style="display:none">
+      <div><label for="mot">Motivo de la penalización</label><select id="mot"><option value="">Elegí el motivo…</option><option>Adelanto CH</option><option>Atraso CH</option><option>Chicana</option><option>Otro</option></select></div>
+      <div><label for="det">Detalle (ej. CH6A, 0.94)</label><input id="det" placeholder="Obligatorio si es Otro" autocomplete="off"></div>
+    </div>
     <p class="text-xs" style="color:var(--mu);margin:0 0 .4rem">Escribí solo números: 1400 → 14:00 · 14035225 → 14:03:52,25</p>
     <div class="err" id="err" role="alert"></div>
     <div class="text-sm" id="ok" style="color:var(--cy);min-height:1.2rem" aria-live="polite"></div>
@@ -124,8 +128,9 @@ function parsePen(v){if(!v.trim())return 0;const m=/^(\d{1,2}):(\d{2})$/.exec(v.
 
 function calc(){
   const n=$('n').value.trim();$('crew').textContent=CREW[n]||(n?'Auto no inscripto':'Ingresá el número de auto');
-  if($('dnf').checked){$('out').textContent='DNF';$('formula').textContent='No suma tiempo y queda fuera del ordenamiento.';return {dnf:true}}
+  if($('dnf').checked){$('motrow').style.display='none';$('out').textContent='DNF';$('formula').textContent='No suma tiempo y queda fuera del ordenamiento.';return {dnf:true}}
   const s=parseStart($('s').value),e=parseEnd($('e').value),p=parsePen($('p').value);
+  $('motrow').style.display=p>0?'':'none';
   let msg='',t=null;
   if($('s').value.length>=5&&s==null)msg='Largada inválida: usá HH:MM (ej. 10:15).';
   else if($('e').value.length>=11&&e==null)msg='Llegada inválida: usá HH:MM:SS,cc (ej. 10:25:41,30).';
@@ -145,6 +150,7 @@ function applyMask(id){
   el.value=out;
 }
 ['n','s','e','p','dnf'].forEach(id=>$(id).addEventListener('input',()=>{if(MASK[id])applyMask(id);$('err').textContent='';$('ok').textContent='';calc()}));
+['mot','det'].forEach(id=>$(id).addEventListener('input',()=>{$('err').textContent='';$('ok').textContent=''}));
 $('ex').onclick=()=>{$('n').value='733';$('s').value='10:15';$('e').value='10:25:41,30';$('p').value='00:10';$('dnf').checked=false;calc()};
 
 let PES=[],EV=null,ROLE=null,ENTRIES=[],stop=null,Q=[],ONLINE=navigator.onLine,pingT=null;
@@ -233,7 +239,14 @@ $('save').onclick=async()=>{
   if(!$('pe').value){$('err').textContent=NOPE;return}
   if(!c){$('err').textContent='Elegí un número de auto inscripto.';return}
   if(!r.dnf&&r.t==null){$('err').textContent=r.msg||'Completá largada y llegada.';return}
-  const entry={special_stage_id:$('pe').value,crew_id:c.id,status:r.dnf?'dnf':'ok',start_cs:r.s,finish_cs:r.e,penalty_cs:r.pen||0};
+  let reason=null;
+  if(!r.dnf&&r.pen>0){
+    const m=$('mot').value,d=$('det').value.trim();
+    if(!m){$('err').textContent='Indicá el motivo de la penalización.';return}
+    if(m==='Otro'&&!d){$('err').textContent='Escribí el motivo de la penalización.';return}
+    reason=m==='Otro'?d:(d?m+' '+d:m);
+  }
+  const entry={special_stage_id:$('pe').value,crew_id:c.id,status:r.dnf?'dnf':'ok',start_cs:r.s,finish_cs:r.e,penalty_cs:r.pen||0,penalty_reason:reason};
   let note='',ok='';
   try{await saveAndPublish(entry);ok=`Tiempo guardado: auto ${c.car_number} · ${$('pe').selectedOptions[0].textContent}`;setOnline(true)}
   catch(e){
@@ -241,7 +254,7 @@ $('save').onclick=async()=>{
     Q.push(entry);saveQ();qlabel();setOnline(false);note='Sin conexión: el tiempo quedó guardado en este dispositivo y se enviará al sincronizar.';
   }
   // Reseteo del formulario: vacio, asi vuelven a verse los ceros grises (placeholder) y se destilda DNF.
-  ['n','s','e','p'].forEach(id=>$(id).value='');$('dnf').checked=false;calc();
+  ['n','s','e','p','det'].forEach(id=>$(id).value='');$('mot').value='';$('dnf').checked=false;calc();
   $('err').textContent=note;$('ok').textContent=ok;   // despues de calc(), que limpia el mensaje de error
   if(navigator.onLine)await refresh();else draw();$('n').focus();
 };
