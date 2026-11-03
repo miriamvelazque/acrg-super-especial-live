@@ -4,7 +4,16 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const SUPABASE_URL = 'https://trlafoxlpxotbevcgash.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_cTEJf_B0j3I8Dqq3UI4T1A_HDsWIa6n';
-export const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Configurado con sessionStorage para que la sesión expire al cerrar el navegador o la pestaña
+export const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    storage: window.sessionStorage,
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false
+  }
+});
 
 export const state = { crews: new Map(), stages: [], results: new Map(), last: 0 };
 // Hora (zona Tierra del Fuego) en formato HH:MM:SS a partir de milisegundos. Sin dato = --:--:--
@@ -63,30 +72,30 @@ export function toRows(st) {
   });
 }
 
-// Ejemplo: startLive('UUID-DEL-EVENTO', st => renderTabla(toRows(st)));
-
 export async function liveEvent() {
   const { data, error } = await sb.from('events').select('*').eq('is_live', true).maybeSingle();
   if (error) throw error;
   return data;
 }
 
-// --- CONTADOR DE VISITAS TOTALES ---
+// --- REGISTRO Y LÓGICA DE AUDIENCIA PRIVADA / PÚBLICA ---
 export async function registrarVisita() {
   try {
     const { data: totalViews, error } = await sb.rpc('increment_views', { page_id: 'home' });
     if (!error && totalViews !== null) {
-      const elContador = document.getElementById('contador-visitas');
-      if (elContador) {
-        elContador.innerText = Number(totalViews).toLocaleString('es-AR');
-      }
+      // Busca si existe el elemento en el panel del admin o en el publico
+      const elAdmin = document.getElementById('admin-contador-visitas');
+      const elPublico = document.getElementById('contador-visitas');
+      
+      const texto = Number(totalViews).toLocaleString('es-AR');
+      if (elAdmin) elAdmin.innerText = texto;
+      if (elPublico) elPublico.innerText = texto;
     }
   } catch (err) {
     console.error('Error al registrar la visita:', err);
   }
 }
 
-// --- CONTADOR DE USUARIOS CONECTADOS EN VIVO (Presence) ---
 export function iniciarContadorEnVivo() {
   const canalPresencia = sb.channel('acrg-live-presence');
 
@@ -94,22 +103,17 @@ export function iniciarContadorEnVivo() {
     .on('presence', { event: 'sync' }, () => {
       const state = canalPresencia.presenceState();
       const totalConectados = Object.keys(state).length;
-      const elConectados = document.getElementById('usuarios-conectados');
-      if (elConectados) {
-        elConectados.innerText = Math.max(1, totalConectados).toLocaleString('es-AR');
-      }
+      
+      const elAdmin = document.getElementById('admin-usuarios-conectados');
+      const elPublico = document.getElementById('usuarios-conectados');
+
+      const texto = Math.max(1, totalConectados).toLocaleString('es-AR');
+      if (elAdmin) elAdmin.innerText = texto;
+      if (elPublico) elPublico.innerText = texto;
     })
     .subscribe(async (status) => {
       if (status === 'SUBSCRIBED') {
         await canalPresencia.track({ online_at: new Date().toISOString() });
       }
     });
-}
-
-// Ejecutar automáticamente al cargar la página
-if (typeof window !== 'undefined') {
-  window.addEventListener('DOMContentLoaded', () => {
-    registrarVisita();
-    iniciarContadorEnVivo();
-  });
 }

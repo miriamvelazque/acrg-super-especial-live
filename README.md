@@ -42,6 +42,7 @@ Aplicación web del **Automóvil Club Río Grande (ACRG)** para consultar las cl
 - Banderas según nacionalidad del piloto y del navegante; si no se especifica, se muestra Argentina.
 - Actualización en vivo de resultados validados, con consulta periódica de respaldo si Realtime se desconecta.
 - Descarga en PDF de las vistas de clasificación.
+- Contador de visitas acumuladas y de usuarios conectados en vivo en el pie de página.
 - Espacios reservados para sponsors y enlaces a información legal.
 
 ### Panel de cronometristas
@@ -123,6 +124,8 @@ Para habilitar el panel:
 - `07_nueva_carrera_plantilla.sql` es una plantilla para preparar otra carrera; edita sus datos antes de usarla.
 
 El cliente Supabase está configurado en `web/03_public-live-timing.js`. Para conectar otro proyecto, cambia allí `SUPABASE_URL` y `SUPABASE_ANON_KEY` por los valores de Supabase. La clave publicable puede usarse en el navegador; nunca expongas una clave `service_role`. La protección de los datos depende de las políticas RLS.
+
+El contador de visitas llama a la función RPC `increment_views` con `page_id = 'home'`. Esa función debe existir y permitir la llamada desde el cliente público; no está incluida en los scripts SQL de este repositorio. El contador de usuarios conectados usa Supabase Realtime Presence.
 
 ## Ejecución local
 

@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;1,700;1,800&family=Barlow:wght@400;500;600&family=Orbitron:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-:root{--bg:#0B0B0B;--panel:#141417;--line:#2a2a31;--cy:#6EC7FF;--vi:#1F6FD6;--mu:#b4b4bd;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{--bg:#0B0B0B;--panel:#141417;--line:#2a2a31;--cy:#6EC7FF;--vi:#1F6FD6;--tx:#fff;--mu:#b4b4bd;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{background:var(--bg);color:#fff;font-family:Barlow,system-ui,sans-serif;margin:0}
 .sp{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-style:normal;font-weight:800}
@@ -18,7 +18,7 @@ body{background:var(--bg);color:#fff;font-family:Barlow,system-ui,sans-serif;mar
 label{display:block;font-size:.85rem;color:var(--mu);margin-bottom:.25rem;font-weight:600}
 input,select{width:100%;background:#0B0B0B;color:#fff;border:1px solid #3a3a43;border-radius:.4rem;padding:.7rem;font-size:1.15rem;font-variant-numeric:tabular-nums}
 input:focus,select:focus,button:focus-visible{outline:2px solid var(--cy);outline-offset:1px}
-.btn{border-radius:.4rem;padding:.8rem 1.2rem;font-weight:700;font-size:1.1rem;cursor:pointer;border:1px solid var(--line);background:transparent;color:#fff}
+.btn{border-radius:.4rem;padding:.6rem 1rem;font-weight:700;font-size:1rem;cursor:pointer;border:1px solid var(--line);background:transparent;color:#fff}
 .go{background:var(--cy);color:#001526;border-color:var(--cy)}
 .res{font-size:3.2rem;line-height:1;color:var(--cy);font-style:italic}
 table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
@@ -29,8 +29,8 @@ th{font-size:.8rem;color:var(--mu)}
 .pw input{padding-right:3.2rem}
 .eye{position:absolute;right:.35rem;top:50%;transform:translateY(-50%);width:2.4rem;height:2.4rem;display:flex;align-items:center;justify-content:center;background:transparent;border:0;border-radius:.4rem;font-size:1.35rem;line-height:1;cursor:pointer;color:#fff}
 .eye:hover{transform:translateY(-50%) scale(1.15)}
-.dot{width:.7rem;height:.7rem;border-radius:50%;color:var(--cy);background:currentColor;box-shadow:0 0 0 0 currentColor;animation:pl 2s infinite;flex:none}
-.dot-lg{width:1.15rem;height:1.15rem}
+.dot{width:.6rem;height:.6rem;border-radius:50%;color:var(--cy);background:currentColor;box-shadow:0 0 0 0 currentColor;animation:pl 2s infinite;flex:none}
+.dot-lg{width:1rem;height:1rem}
 .dot.off{color:#ff4d4d}
 @keyframes pl{70%{box-shadow:0 0 0 .8rem transparent}100%{box-shadow:0 0 0 0 transparent}}
 @media (prefers-reduced-motion:reduce){.dot{animation:none}}
@@ -50,23 +50,31 @@ th{font-size:.8rem;color:var(--mu)}
 </style>
 </head>
 <body>
-<header class="hero"><div class="max-w-5xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-3">
-  <div class="flex items-center gap-4"><img class="logo" src="assets/logo-acrg.jpg" alt="Automóvil Club Río Grande" width="720" height="720">
-  <div><h1 class="ttl text-lg md:text-2xl m-0 leading-tight">Carga de tiempos</h1>
-  <p class="m-0 mt-1 text-sm" style="color:var(--cy)">Panel de cronometristas, ACRG</p></div></div>
-  <div id="hdr" class="flex flex-wrap items-center gap-4" hidden>
-    <div id="who" class="text-sm font-semibold" style="color:var(--cy)">Conectado</div>
-    <div class="leading-tight text-right" aria-live="polite">
-      <div class="flex items-center justify-end gap-2 font-semibold"><span id="ndot" class="dot dot-lg"></span><span id="nst">En vivo</span></div>
-      <div id="upd" class="text-xs mt-1" style="color:var(--mu)">Última actualización: --:--:--</div>
+<header class="hero"><div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+  <div class="flex items-center gap-3"><img class="logo" src="assets/logo-acrg.jpg" alt="Automóvil Club Río Grande" width="720" height="720">
+  <div><h1 class="ttl text-base md:text-xl m-0 leading-tight">Carga de tiempos</h1>
+  <p class="m-0 text-xs" style="color:var(--cy)">Panel de cronometristas, ACRG</p></div></div>
+  
+  <div id="hdr" class="flex items-center gap-3 text-sm" hidden>
+    <div id="who" class="font-semibold" style="color:var(--cy)">Usuario: --</div>
+    
+    <div class="flex items-center gap-1.5 px-3 py-1 bg-[#141417] border border-[#2a2a31] rounded-md text-xs">
+      <span style="width:7px;height:7px;background:#10B981;border-radius:50%;display:inline-block"></span>
+      <span style="color:var(--mu)">Conectados:</span> <strong id="admin-usuarios-conectados" style="color:#fff">--</strong>
     </div>
-    <button class="btn" id="so">Salir</button>
+
+    <div class="leading-tight text-right pl-2 border-l border-[#2a2a31]" aria-live="polite">
+      <div class="flex items-center justify-end gap-1.5 font-semibold text-xs"><span id="ndot" class="dot"></span><span id="nst">En vivo</span></div>
+      <div id="upd" class="text-[10px]" style="color:var(--mu)">--:--:--</div>
+    </div>
+    <button class="btn py-1 px-3 text-sm" id="so">Salir</button>
   </div>
 </div></header>
 
 <section id="login" class="max-w-sm mx-auto px-4 py-10"><div class="card"><h2 class="ttl text-lg m-0 mb-3">Ingreso de personal</h2>
 <label for="luser">Usuario</label><input id="luser" type="text" autocomplete="username" autocapitalize="words" spellcheck="false"><label for="lpass" class="mt-3">Contraseña</label><div class="pw"><input id="lpass" type="password" autocomplete="current-password"><button type="button" class="eye" id="lpw" aria-label="Mostrar contraseña" title="Mostrar contraseña" aria-pressed="false">🙈</button></div>
 <div class="err" id="lerr" role="alert"></div><button class="btn go sp mt-2" id="lgo">Ingresar</button></div></section>
+
 <main id="app" hidden class="max-w-5xl mx-auto px-4 py-5 grid gap-4 md:grid-cols-2">
   <section class="card" aria-label="Carga">
     <div class="grid grid-cols-2 gap-2 mb-3">
@@ -115,13 +123,13 @@ th{font-size:.8rem;color:var(--mu)}
 
 <script src="footer.js"></script>
 <script type="module">
-import { sb, state, loadSnapshot, liveEvent, clock } from './03_public-live-timing.js';
+import { sb, state, loadSnapshot, liveEvent, clock, iniciarContadorEnVivo } from './03_public-live-timing.js';
 import { signIn, signOut, onAuth, myRole, saveEntry, validateEntry, watchEntries, loadStages } from './04_admin-client.js';
 const $=s=>document.getElementById(s);
 let CREW={},BYNUM={};
 const p2=v=>String(v).padStart(2,'0');
 const fmt=x=>{const m=Math.floor(x/6000),s=Math.floor(x/100)%60,c=x%100;return m+':'+p2(s)+'.'+p2(c)};
-// Todo se calcula en centésimas para evitar errores de punto flotante.
+
 function parseStart(v){const m=/^(\d{1,2}):(\d{2})$/.exec(v.trim());if(!m||+m[1]>23||+m[2]>59)return null;return (+m[1]*3600+ +m[2]*60)*100}
 function parseEnd(v){const m=/^(\d{1,2}):(\d{2}):(\d{2})[,.](\d{2})$/.exec(v.trim());if(!m||+m[1]>23||+m[2]>59||+m[3]>59)return null;return (+m[1]*3600+ +m[2]*60+ +m[3])*100+ +m[4]}
 function parsePen(v){if(!v.trim())return 0;const m=/^(\d{1,2}):(\d{2})$/.exec(v.trim());if(!m||+m[2]>59)return null;return (+m[1]*60+ +m[2])*100}
@@ -141,7 +149,7 @@ function calc(){
   $('formula').textContent=t==null?'Llegada - largada + penalización':`${fmt(e-s)} neto + ${fmt(p)} penalización`;
   return {t,pen:p,msg,s,e};
 }
-// Mascara: se tipean solo digitos y se insertan : y , solos. Sin separador final, asi el borrado funciona normal.
+
 const MASK={s:{g:[2,2],sep:[':']},p:{g:[2,2],sep:[':']},e:{g:[2,2,2,2],sep:[':',':',',']}};
 function applyMask(id){
   const {g,sep}=MASK[id],el=$(id),d=el.value.replace(/\D/g,'').slice(0,g.reduce((a,b)=>a+b,0));
@@ -158,17 +166,18 @@ try{Q=JSON.parse(localStorage.getItem('rf-queue')||'[]')}catch{}
 const saveQ=()=>{try{localStorage.setItem('rf-queue',JSON.stringify(Q))}catch{}};
 const esc=s=>String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 const canValidate=()=>['commissioner','admin'].includes(ROLE?.role);
-// AUTO_VALIDAR = true: al guardar, un usuario comisario/admin publica el tiempo al instante (sin tocar "Validar").
-// Poner false para volver al flujo original (cronometrista carga, comisario valida).
 const AUTO_VALIDAR=true;
 async function saveAndPublish(e){const row=await saveEntry(e);if(AUTO_VALIDAR&&canValidate()&&row&&!row.validated){const {error}=await validateEntry(row.id,true);if(error)throw new Error(error.message)}return row}
 const isNet=e=>!navigator.onLine||/fetch|network/i.test(e.message);
 const ROLES={timekeeper:'Cronometrista',commissioner:'Comisario',admin:'Administrador'};
-function paintWho(){const n=ROLE?.display_name||ROLES[ROLE?.role]||'';$('who').textContent=n?`Conectado: ${n}`:'Conectado'}
+
+function paintWho(){
+  const displayName = ROLE?.display_name || ROLES[ROLE?.role] || 'Cronometrista';
+  $('who').textContent = `Usuario: ${displayName}`;
+}
+
 function paintNet(){$('ndot').classList.toggle('off',!ONLINE);const t=$('nst');t.textContent=ONLINE?'En vivo':'Off line';t.style.color=ONLINE?'':'#ff6b6b'}
-// Al volver la conexion se envian solos los tiempos que quedaron pendientes.
 function setOnline(v){const was=ONLINE;ONLINE=v;paintNet();if(v&&!was)flush()}
-// Aviso de red: evento del navegador + prueba real contra Supabase cada 12 s (hay senal pero sin datos tambien cuenta como Off line).
 async function ping(){
   if(!ROLE)return;
   if(!navigator.onLine){setOnline(false);return}
@@ -177,7 +186,7 @@ async function ping(){
     setOnline(!(r.error&&/fetch|network/i.test(r.error.message)));
   }catch{setOnline(false)}
 }
-function paintUpd(){const ms=ENTRIES.reduce((m,r)=>Math.max(m,Date.parse(r.updated_at)||0),0);$('upd').textContent='Última actualización: '+clock(ms)}
+function paintUpd(){const ms=ENTRIES.reduce((m,r)=>Math.max(m,Date.parse(r.updated_at)||0),0);$('upd').textContent=clock(ms)}
 const qlabel=()=>{$('sync').textContent=Q.length?`Sincronizar pendientes (${Q.length})`:'Sincronizar pendientes'};
 
 function fillPE(){
@@ -203,7 +212,17 @@ async function init(){
   for(const c of state.crews.values()){BYNUM[c.car_number]=c;CREW[c.car_number]=`${c.driver} / ${c.co_driver||''} (${c.category})`}
   $('autos').innerHTML=Object.keys(CREW).map(k=>`<option value="${k}">${esc(CREW[k])}</option>`).join('');
   fillPE();
-  $('login').hidden=true;$('app').hidden=false;$('hdr').hidden=false;paintWho();paintNet();
+  
+  $('login').hidden=true;
+  $('app').hidden=false;
+  $('hdr').hidden=false;
+  paintWho();
+  paintNet();
+  
+  try {
+    iniciarContadorEnVivo();
+  } catch(e) { console.error('Error contador en vivo admin:', e); }
+
   await refresh();stop?.();stop=watchEntries(refresh);qlabel();calc();
   clearInterval(pingT);pingT=setInterval(ping,12000);ping();if(Q.length)flush();
 }
@@ -219,7 +238,6 @@ async function refresh(){
 }
 function draw(){
   const pn=id=>esc(PES.find(p=>p.id===id)?.name);
-  // Celda de estado de ancho fijo: el texto y el boton ocupan siempre el mismo lugar.
   const stCell=(txt,color,btn)=>`<td class="col-st"><div class="st"><span class="st-t" style="color:${color}">${txt}</span>${btn||''}</div></td>`;
   const row=(pe,c,t,pen,when,st)=>{const who=c?esc(c.driver+' / '+(c.co_driver||'')):'';return `<tr><td>${pe}</td><td class="sp text-lg">${c?c.car_number:''}</td><td title="${who}">${who}</td><td class="sp text-lg" style="color:var(--cy)">${t}</td><td>${pen?fmt(pen):'-'}</td><td>${when}</td>${st}</tr>`};
   const queued=Q.map(q=>row(pn(q.special_stage_id),state.crews.get(q.crew_id),q.status==='dnf'?'DNF':fmt(q.finish_cs-q.start_cs+q.penalty_cs),q.penalty_cs,'-',stCell('Sin enviar','#ff6b81')));
@@ -253,9 +271,8 @@ $('save').onclick=async()=>{
     if(!isNet(e)){$('err').textContent=e.message;return}
     Q.push(entry);saveQ();qlabel();setOnline(false);note='Sin conexión: el tiempo quedó guardado en este dispositivo y se enviará al sincronizar.';
   }
-  // Reseteo del formulario: vacio, asi vuelven a verse los ceros grises (placeholder) y se destilda DNF.
   ['n','s','e','p','det'].forEach(id=>$(id).value='');$('mot').value='';$('dnf').checked=false;calc();
-  $('err').textContent=note;$('ok').textContent=ok;   // despues de calc(), que limpia el mensaje de error
+  $('err').textContent=note;$('ok').textContent=ok;
   if(navigator.onLine)await refresh();else draw();$('n').focus();
 };
 async function flush(){
@@ -270,7 +287,6 @@ $('lpw').onclick=()=>{const i=$('lpass'),b=$('lpw'),ver=i.type==='password';i.ty
 $('lgo').onclick=async()=>{$('lerr').textContent='';const pw=$('lpass').value;hidePw();try{await signIn($('luser').value,pw)}catch(e){$('lerr').textContent=e.message}};
 $('so').onclick=()=>signOut();
 ['luser','lpass'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter')$('lgo').click()}));
-// Importante: no llamar a supabase directo dentro del callback de auth (puede bloquearse); por eso el setTimeout.
 onAuth(s=>setTimeout(()=>{if(!s)showLogin();else if(!EV)init().catch(e=>{$('lerr').textContent=e.message})},0));
 
 calc();draw();paintNet();

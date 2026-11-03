@@ -1,4 +1,4 @@
-// Pie de pagina compartido. Completa CONTACTO (whatsapp, facebook, instagram, email): lo que quede vacio no se muestra.
+// Pie de pagina compartido (Vista Publica Limpia)
 (() => {
   const C = { 
     whatsapp: '5492964509725', 
@@ -45,10 +45,6 @@
         Diseñado y desarrollado por Miriam Velazque | 
         <a href="https://wa.me/${digits(C.whatsapp)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:.3rem"><span style="display:inline-flex">${I.wa}</span> (+54) 92964509725</a> 
         <a href="${C.linkedin}" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn de Miriam Velazque">${I.li}</a>
-        <span class="sep" aria-hidden="true">|</span> 
-        👁️ Visitas: <strong id="contador-visitas" style="color:#6EC7FF">--</strong>
-        <span class="sep" aria-hidden="true">|</span> 
-        🟢 Conectados: <strong id="usuarios-conectados" style="color:#10B981">--</strong>
       </span>
     </div></div>`;
   document.body.appendChild(f);
