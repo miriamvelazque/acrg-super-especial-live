@@ -18,7 +18,7 @@ body{background:var(--bg);color:#fff;font-family:Barlow,system-ui,sans-serif;mar
 label{display:block;font-size:.85rem;color:var(--mu);margin-bottom:.25rem;font-weight:600}
 input,select{width:100%;background:#0B0B0B;color:#fff;border:1px solid #3a3a43;border-radius:.4rem;padding:.7rem;font-size:1.15rem;font-variant-numeric:tabular-nums}
 input:focus,select:focus,button:focus-visible{outline:2px solid var(--cy);outline-offset:1px}
-.btn{border-radius:.4rem;padding:.8rem 1.2rem;font-weight:700;font-size:1.1rem;cursor:pointer;border:1px solid var(--line);background:transparent;color:#fff}
+.btn{border-radius:.4rem;padding:.6rem 1rem;font-weight:700;font-size:1rem;cursor:pointer;border:1px solid var(--line);background:transparent;color:#fff}
 .go{background:var(--cy);color:#001514;border-color:var(--cy)}
 .res{font-size:3.2rem;line-height:1;color:var(--cy);font-style:italic}
 table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
@@ -29,8 +29,8 @@ th{font-size:.8rem;color:var(--mu)}
 .pw input{padding-right:3.2rem}
 .eye{position:absolute;right:.35rem;top:50%;transform:translateY(-50%);width:2.4rem;height:2.4rem;display:flex;align-items:center;justify-content:center;background:transparent;border:0;border-radius:.4rem;font-size:1.35rem;line-height:1;cursor:pointer;color:#fff}
 .eye:hover{transform:translateY(-50%) scale(1.15)}
-.dot{width:.7rem;height:.7rem;border-radius:50%;color:var(--cy);background:currentColor;box-shadow:0 0 0 0 currentColor;animation:pl 2s infinite;flex:none}
-.dot-lg{width:1.15rem;height:1.15rem}
+.dot{width:.6rem;height:.6rem;border-radius:50%;color:var(--cy);background:currentColor;box-shadow:0 0 0 0 currentColor;animation:pl 2s infinite;flex:none}
+.dot-lg{width:1rem;height:1rem}
 .dot.off{color:#ff4d4d}
 @keyframes pl{70%{box-shadow:0 0 0 .8rem transparent}100%{box-shadow:0 0 0 0 transparent}}
 @media (prefers-reduced-motion:reduce){.dot{animation:none}}
@@ -50,23 +50,31 @@ th{font-size:.8rem;color:var(--mu)}
 </style>
 </head>
 <body>
-<header class="hero"><div class="max-w-5xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-3">
-  <div class="flex items-center gap-4"><img class="logo" src="assets/logo-rally-fueguino.png" alt="Rally Fueguino A.PI.TU.R." width="640" height="179">
-  <div><h1 class="ttl text-lg md:text-2xl m-0 leading-tight">Carga de tiempos</h1>
-  <p class="m-0 mt-1 text-sm" style="color:var(--cy)">Panel de cronometristas, A.PI.TU.R.</p></div></div>
-  <div id="hdr" class="flex flex-wrap items-center gap-4" hidden>
-    <div id="who" class="text-sm font-semibold" style="color:var(--cy)">Conectado</div>
-    <div class="leading-tight text-right" aria-live="polite">
-      <div class="flex items-center justify-end gap-2 font-semibold"><span id="ndot" class="dot dot-lg"></span><span id="nst">En vivo</span></div>
-      <div id="upd" class="text-xs mt-1" style="color:var(--mu)">Última actualización: --:--:--</div>
+<header class="hero"><div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+  <div class="flex items-center gap-3"><img class="logo" src="assets/logo-rally-fueguino.png" alt="Rally Fueguino A.PI.TU.R." width="640" height="179">
+  <div><h1 class="ttl text-base md:text-xl m-0 leading-tight">Carga de tiempos</h1>
+  <p class="m-0 text-xs" style="color:var(--cy)">Panel de cronometristas, A.PI.TU.R.</p></div></div>
+  
+  <div id="hdr" class="flex items-center gap-3 text-sm" hidden>
+    <div id="who" class="font-semibold" style="color:var(--cy)">Usuario: --</div>
+    
+    <div class="flex items-center gap-1.5 px-3 py-1 bg-[#141417] border border-[#2a2a31] rounded-md text-xs">
+      <span style="width:7px;height:7px;background:#10B981;border-radius:50%;display:inline-block"></span>
+      <span style="color:var(--mu)">Conectados:</span> <strong id="admin-usuarios-conectados" style="color:#fff">--</strong>
     </div>
-    <button class="btn" id="so">Salir</button>
+
+    <div class="leading-tight text-right pl-2 border-l border-[#2a2a31]" aria-live="polite">
+      <div class="flex items-center justify-end gap-1.5 font-semibold text-xs"><span id="ndot" class="dot"></span><span id="nst">En vivo</span></div>
+      <div id="upd" class="text-[10px]" style="color:var(--mu)">--:--:--</div>
+    </div>
+    <button class="btn py-1 px-3 text-sm" id="so">Salir</button>
   </div>
 </div></header>
 
 <section id="login" class="max-w-sm mx-auto px-4 py-10"><div class="card"><h2 class="ttl text-lg m-0 mb-3">Ingreso de personal</h2>
 <label for="luser">Usuario</label><input id="luser" type="text" autocomplete="username" autocapitalize="words" spellcheck="false"><label for="lpass" class="mt-3">Contraseña</label><div class="pw"><input id="lpass" type="password" autocomplete="current-password"><button type="button" class="eye" id="lpw" aria-label="Mostrar contraseña" title="Mostrar contraseña" aria-pressed="false">🙈</button></div>
 <div class="err" id="lerr" role="alert"></div><button class="btn go sp mt-2" id="lgo">Ingresar</button></div></section>
+
 <main id="app" hidden class="max-w-5xl mx-auto px-4 py-5 grid gap-4 md:grid-cols-2">
   <section class="card" aria-label="Carga">
     <div class="grid grid-cols-2 gap-2 mb-3">
@@ -84,6 +92,13 @@ th{font-size:.8rem;color:var(--mu)}
       <div><label for="p">Penalización (MM:SS)</label><input id="p" placeholder="00:00" inputmode="numeric" autocomplete="off"></div>
       <div class="flex items-end pb-3"><label class="flex items-center gap-2 m-0 text-base" style="color:#fff"><input id="dnf" type="checkbox" style="width:1.4rem;height:1.4rem"> DNF / Abandono</label></div>
     </div>
+    
+    <!-- Selector de motivo de penalización -->
+    <div id="motrow" class="grid grid-cols-2 gap-2 mb-3" style="display:none">
+      <div><label for="mot">Motivo de la penalización</label><select id="mot"><option value="">Elegí el motivo…</option><option>Adelanto CH</option><option>Atraso CH</option><option>Chicana</option><option>Otro</option></select></div>
+      <div><label for="det">Detalle (ej. CH6A, 0.94)</label><input id="det" placeholder="Obligatorio si es Otro" autocomplete="off"></div>
+    </div>
+
     <p class="text-xs" style="color:var(--mu);margin:0 0 .4rem">Escribí solo números: 1400 → 14:00 · 14035225 → 14:03:52,25</p>
     <div class="err" id="err" role="alert"></div>
     <div class="text-sm" id="ok" style="color:var(--cy);min-height:1.2rem" aria-live="polite"></div>
@@ -111,7 +126,7 @@ th{font-size:.8rem;color:var(--mu)}
 
 <script src="footer.js"></script>
 <script type="module">
-import { sb, state, loadSnapshot, liveEvent, clock } from './03_public-live-timing.js';
+import { sb, state, loadSnapshot, liveEvent, clock, iniciarContadorEnVivo } from './03_public-live-timing.js';
 import { signIn, signOut, onAuth, myRole, saveEntry, validateEntry, watchEntries, loadStages } from './04_admin-client.js';
 const $=s=>document.getElementById(s);
 let CREW={},BYNUM={};
@@ -124,8 +139,9 @@ function parsePen(v){if(!v.trim())return 0;const m=/^(\d{1,2}):(\d{2})$/.exec(v.
 
 function calc(){
   const n=$('n').value.trim();$('crew').textContent=CREW[n]||(n?'Auto no inscripto':'Ingresá el número de auto');
-  if($('dnf').checked){$('out').textContent='DNF';$('formula').textContent='No suma tiempo y queda fuera del ordenamiento.';return {dnf:true}}
+  if($('dnf').checked){$('motrow').style.display='none';$('out').textContent='DNF';$('formula').textContent='No suma tiempo y queda fuera del ordenamiento.';return {dnf:true}}
   const s=parseStart($('s').value),e=parseEnd($('e').value),p=parsePen($('p').value);
+  $('motrow').style.display=p>0?'':'none';
   let msg='',t=null;
   if($('s').value.length>=5&&s==null)msg='Largada inválida: usá HH:MM (ej. 10:15).';
   else if($('e').value.length>=11&&e==null)msg='Llegada inválida: usá HH:MM:SS,cc (ej. 10:25:41,30).';
@@ -145,6 +161,7 @@ function applyMask(id){
   el.value=out;
 }
 ['n','s','e','p','dnf'].forEach(id=>$(id).addEventListener('input',()=>{if(MASK[id])applyMask(id);$('err').textContent='';$('ok').textContent='';calc()}));
+['mot','det'].forEach(id=>$(id).addEventListener('input',()=>{$('err').textContent='';$('ok').textContent=''}));
 $('ex').onclick=()=>{$('n').value='733';$('s').value='10:15';$('e').value='10:25:41,30';$('p').value='00:10';$('dnf').checked=false;calc()};
 
 let PES=[],EV=null,ROLE=null,ENTRIES=[],stop=null,Q=[],ONLINE=navigator.onLine,pingT=null;
@@ -154,7 +171,12 @@ const esc=s=>String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&g
 const canValidate=()=>['commissioner','admin'].includes(ROLE?.role);
 const isNet=e=>!navigator.onLine||/fetch|network/i.test(e.message);
 const ROLES={timekeeper:'Cronometrista',commissioner:'Comisario',admin:'Administrador'};
-function paintWho(){const n=ROLE?.display_name||ROLES[ROLE?.role]||'';$('who').textContent=n?`Conectado: ${n}`:'Conectado'}
+
+function paintWho(){
+  const displayName = ROLE?.display_name || ROLES[ROLE?.role] || 'Cronometrista';
+  $('who').textContent = `Usuario: ${displayName}`;
+}
+
 function paintNet(){$('ndot').classList.toggle('off',!ONLINE);const t=$('nst');t.textContent=ONLINE?'En vivo':'Off line';t.style.color=ONLINE?'':'#ff6b6b'}
 // Al volver la conexion se envian solos los tiempos que quedaron pendientes.
 function setOnline(v){const was=ONLINE;ONLINE=v;paintNet();if(v&&!was)flush()}
@@ -167,7 +189,7 @@ async function ping(){
     setOnline(!(r.error&&/fetch|network/i.test(r.error.message)));
   }catch{setOnline(false)}
 }
-function paintUpd(){const ms=ENTRIES.reduce((m,r)=>Math.max(m,Date.parse(r.updated_at)||0),0);$('upd').textContent='Última actualización: '+clock(ms)}
+function paintUpd(){const ms=ENTRIES.reduce((m,r)=>Math.max(m,Date.parse(r.updated_at)||0),0);$('upd').textContent=clock(ms)}
 const qlabel=()=>{$('sync').textContent=Q.length?`Sincronizar pendientes (${Q.length})`:'Sincronizar pendientes'};
 
 function fillPE(){
@@ -194,6 +216,11 @@ async function init(){
   $('autos').innerHTML=Object.keys(CREW).map(k=>`<option value="${k}">${esc(CREW[k])}</option>`).join('');
   fillPE();
   $('login').hidden=true;$('app').hidden=false;$('hdr').hidden=false;paintWho();paintNet();
+  
+  try {
+    iniciarContadorEnVivo();
+  } catch(e) { console.error('Error contador en vivo admin:', e); }
+
   await refresh();stop?.();stop=watchEntries(refresh);qlabel();calc();
   clearInterval(pingT);pingT=setInterval(ping,12000);ping();if(Q.length)flush();
 }
@@ -229,7 +256,16 @@ $('save').onclick=async()=>{
   if(!$('pe').value){$('err').textContent=NOPE;return}
   if(!c){$('err').textContent='Elegí un número de auto inscripto.';return}
   if(!r.dnf&&r.t==null){$('err').textContent=r.msg||'Completá largada y llegada.';return}
-  const entry={special_stage_id:$('pe').value,crew_id:c.id,status:r.dnf?'dnf':'ok',start_cs:r.s,finish_cs:r.e,penalty_cs:r.pen||0};
+  
+  let reason=null;
+  if(!r.dnf&&r.pen>0){
+    const m=$('mot').value,d=$('det').value.trim();
+    if(!m){$('err').textContent='Indicá el motivo de la penalización.';return}
+    if(m==='Otro'&&!d){$('err').textContent='Escribí el motivo de la penalización.';return}
+    reason=m==='Otro'?d:(d?m+' '+d:m);
+  }
+
+  const entry={special_stage_id:$('pe').value,crew_id:c.id,status:r.dnf?'dnf':'ok',start_cs:r.s,finish_cs:r.e,penalty_cs:r.pen||0,penalty_reason:reason};
   let note='',ok='';
   try{await saveEntry(entry);ok=`Tiempo guardado: auto ${c.car_number} · ${$('pe').selectedOptions[0].textContent}`;setOnline(true)}
   catch(e){
@@ -237,7 +273,7 @@ $('save').onclick=async()=>{
     Q.push(entry);saveQ();qlabel();setOnline(false);note='Sin conexión: el tiempo quedó guardado en este dispositivo y se enviará al sincronizar.';
   }
   // Reseteo del formulario: vacio, asi vuelven a verse los ceros grises (placeholder) y se destilda DNF.
-  ['n','s','e','p'].forEach(id=>$(id).value='');$('dnf').checked=false;calc();
+  ['n','s','e','p','det'].forEach(id=>$(id).value='');$('mot').value='';$('dnf').checked=false;calc();
   $('err').textContent=note;$('ok').textContent=ok;   // despues de calc(), que limpia el mensaje de error
   if(navigator.onLine)await refresh();else draw();$('n').focus();
 };

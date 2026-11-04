@@ -4,7 +4,16 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const SUPABASE_URL = 'https://opvshuqgzznzqaaxdnai.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable__PAzpzPU6ixYma8JAM1Upw_IOsvrZvG';
-export const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Configurado con sessionStorage para que la sesión expire al cerrar la pestaña o el navegador
+export const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    storage: window.sessionStorage,
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false
+  }
+});
 
 export const state = { crews: new Map(), stages: [], results: new Map(), last: 0 };
 // Hora (zona Tierra del Fuego) en formato HH:MM:SS a partir de milisegundos. Sin dato = --:--:--
@@ -63,10 +72,28 @@ export function toRows(st) {
   });
 }
 
-// Ejemplo: startLive('UUID-DEL-EVENTO', st => renderTabla(toRows(st)));
-
 export async function liveEvent() {
   const { data, error } = await sb.from('events').select('*').eq('is_live', true).maybeSingle();
   if (error) throw error;
   return data;
+}
+
+// --- CONTADOR DE USUARIOS CONECTADOS EN VIVO (Presence) ---
+export function iniciarContadorEnVivo() {
+  const canalPresencia = sb.channel('apitur-live-presence');
+
+  canalPresencia
+    .on('presence', { event: 'sync' }, () => {
+      const state = canalPresencia.presenceState();
+      const totalConectados = Object.keys(state).length;
+      const elConectados = document.getElementById('admin-usuarios-conectados');
+      if (elConectados) {
+        elConectados.innerText = Math.max(1, totalConectados).toLocaleString('es-AR');
+      }
+    })
+    .subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        await canalPresencia.track({ online_at: new Date().toISOString() });
+      }
+    });
 }
