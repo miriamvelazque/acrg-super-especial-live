@@ -12,7 +12,7 @@ html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{background:var(--bg);color:#fff;font-family:Barlow,system-ui,sans-serif;margin:0}
 .sp{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-style:normal;font-weight:800}
 .ttl{font-family:Orbitron,'Barlow Condensed',sans-serif;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
-.logo{height:4rem;width:4rem;max-width:100%;display:block;border-radius:50%;background:#fff;object-fit:contain}
+.logo{height:4rem;width:4rem;max-width:100%;display:block;border-radius:50%;background:#fff;object-fit:contain;flex-shrink:0}
 .hero{background:linear-gradient(100deg,#0B0B0B 30%,#0d2a4d 100%);border-bottom:3px solid var(--cy)}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:.6rem;padding:1rem}
 label{display:block;font-size:.85rem;color:var(--mu);margin-bottom:.25rem;font-weight:600}
@@ -45,17 +45,18 @@ th{font-size:.8rem;color:var(--mu)}
 .st-t{display:inline-block;width:6.5rem;text-align:center}
 .vbtn{width:6.2rem;padding:.25rem 0;font-size:.9rem}
 .vbtn.pend{background:#ff9f43;border-color:#ff9f43;color:#1a0f00}
+.vbtn.ed{border-color:var(--vi);color:#fff}
 [hidden]{display:none!important}
 .err{color:#ff6b81;font-size:.9rem;min-height:1.2rem}
 </style>
 </head>
 <body>
-<header class="hero"><div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-2">
-  <div class="flex items-center gap-3"><img class="logo" src="assets/logo-acrg.jpg" alt="Automóvil Club Río Grande" width="720" height="720">
+<header class="hero"><div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2">
+  <div class="flex items-center gap-3 min-w-0"><img class="logo" src="assets/logo-acrg.jpg" alt="Automóvil Club Río Grande" width="720" height="720">
   <div><h1 class="ttl text-base md:text-xl m-0 leading-tight">Carga de tiempos</h1>
   <p class="m-0 text-xs" style="color:var(--cy)">Panel de cronometristas, ACRG</p></div></div>
   
-  <div id="hdr" class="flex items-center gap-3 text-sm" hidden>
+  <div id="hdr" class="flex flex-wrap sm:flex-nowrap items-center gap-x-3 gap-y-1 text-sm sm:shrink-0 sm:whitespace-nowrap" hidden>
     <div id="who" class="font-semibold" style="color:var(--cy)">Usuario: --</div>
     
     <div class="flex items-center gap-1.5 px-3 py-1 bg-[#141417] border border-[#2a2a31] rounded-md text-xs">
@@ -65,7 +66,7 @@ th{font-size:.8rem;color:var(--mu)}
 
     <div class="leading-tight text-right pl-2 border-l border-[#2a2a31]" aria-live="polite">
       <div class="flex items-center justify-end gap-1.5 font-semibold text-xs"><span id="ndot" class="dot"></span><span id="nst">En vivo</span></div>
-      <div id="upd" class="text-[10px]" style="color:var(--mu)">--:--:--</div>
+      <div id="upd" class="text-[10px] tabular-nums" style="color:var(--mu)">--:--:--</div>
     </div>
     <button class="btn py-1 px-3 text-sm" id="so">Salir</button>
   </div>
@@ -97,6 +98,7 @@ th{font-size:.8rem;color:var(--mu)}
       <div><label for="det">Detalle (ej. CH6A, 0.94)</label><input id="det" placeholder="Obligatorio si es Otro" autocomplete="off"></div>
     </div>
     <p class="text-xs" style="color:var(--mu);margin:0 0 .4rem">Escribí solo números: 1400 → 14:00 · 14035225 → 14:03:52,25</p>
+    <div id="edit" class="text-sm" style="display:none;margin:0 0 .5rem;padding:.5rem .75rem;border:1px solid var(--vi);border-radius:.5rem;background:#0d1b30" aria-live="polite"></div>
     <div class="err" id="err" role="alert"></div>
     <div class="text-sm" id="ok" style="color:var(--cy);min-height:1.2rem" aria-live="polite"></div>
     <div class="flex gap-2 mt-2"><button class="btn go sp" id="save">Guardar tiempo</button><button class="btn" id="ex" type="button">Cargar ejemplo</button></div>
@@ -243,12 +245,69 @@ function draw(){
   const queued=Q.map(q=>row(pn(q.special_stage_id),state.crews.get(q.crew_id),q.status==='dnf'?'DNF':fmt(q.finish_cs-q.start_cs+q.penalty_cs),q.penalty_cs,'-',stCell('Sin enviar','#ff6b81')));
   const sent=ENTRIES.map(r=>row(pn(r.special_stage_id),state.crews.get(r.crew_id),r.status==='dnf'?'DNF':fmt(r.net_cs),r.penalty_cs,new Date(r.updated_at).toLocaleTimeString('es-AR',{hourCycle:'h23',timeZone:'America/Argentina/Ushuaia'}),
     stCell(r.validated?'Validado':'Sin validar',r.validated?'var(--cy)':'#ff9f43',
-      canValidate()?`<button class="btn vbtn${r.validated?'':' pend'}" data-v="${r.id}" data-on="${!r.validated}">${r.validated?'Reabrir':'Validar'}</button>`:'')));
+      // Publicacion directa: lo cargado ya es publico, asi que se EDITA (precarga el formulario y reemplaza). "Reabrir" sacaria el tiempo de la web publica.
+      AUTO_VALIDAR?`<button class="btn vbtn ed" data-ed="${r.id}">Editar</button>`
+      :canValidate()?`<button class="btn vbtn${r.validated?'':' pend'}" data-v="${r.id}" data-on="${!r.validated}">${r.validated?'Reabrir':'Validar'}</button>`:'')));
   $('empty').style.display=queued.length+sent.length?'none':'block';
   $('log').innerHTML=queued.concat(sent).join('');
   paintUpd();
 }
-$('log').onclick=async e=>{const b=e.target.closest('[data-v]');if(!b)return;
+// --- Corregir un tiempo ya cargado: se precargan largada, llegada, penalizacion y motivo; al guardar se reemplaza y queda en el historial.
+const hmStr=cs=>{const t=Math.floor(cs/100);return p2(Math.floor(t/3600))+':'+p2(Math.floor(t%3600/60))};
+const hmsStr=cs=>{const t=Math.floor(cs/100);return p2(Math.floor(t/3600))+':'+p2(Math.floor(t%3600/60))+':'+p2(t%60)+','+p2(cs%100)};
+const mmssStr=cs=>p2(Math.floor(cs/6000))+':'+p2(Math.floor(cs%6000/100));
+const MOTIVOS=['Adelanto CH','Atraso CH','Chicana'];
+let EDIT=null,chkTok=0;
+const fieldsEmpty=()=>!$('s').value&&!$('e').value&&!$('p').value&&!$('dnf').checked;
+function clearFields(){['s','e','p','det'].forEach(id=>$(id).value='');$('mot').value='';$('dnf').checked=false}
+function fillFrom(r){
+  clearFields();
+  if(r.status==='dnf'){$('dnf').checked=true}
+  else{
+    $('s').value=hmStr(r.start_cs);$('e').value=hmsStr(r.finish_cs);
+    if(r.penalty_cs>0){
+      $('p').value=mmssStr(r.penalty_cs);
+      const m=r.penalty_reason||'',base=MOTIVOS.find(x=>m===x||m.startsWith(x+' '));
+      if(base){$('mot').value=base;$('det').value=m.slice(base.length).trim()}
+      else if(m){$('mot').value='Otro';$('det').value=m}
+    }
+  }
+  calc();
+}
+function paintEdit(){
+  const b=$('edit'),sv=$('save');
+  if(!EDIT){b.style.display='none';b.innerHTML='';sv.textContent='Guardar tiempo';return}
+  const c=state.crews.get(EDIT.crew_id),t=EDIT.status==='dnf'?'DNF':fmt(EDIT.net_cs);
+  b.style.display='';sv.textContent='Guardar corrección';
+  b.innerHTML=`<strong>Corrigiendo</strong> auto ${esc(c?.car_number)} · ${esc(PES.find(p=>p.id===EDIT.special_stage_id)?.name)} · tiempo cargado: <strong>${t}</strong>. Los datos están precargados: cambiá lo que haga falta y guardá (reemplaza el anterior y se publica al instante). <button type="button" class="btn" id="edcancel" style="padding:.15rem .6rem;font-size:.85rem;margin-left:.4rem">Cancelar</button>`;
+  $('edcancel').onclick=cancelEdit;
+}
+function cancelEdit(){EDIT=null;clearFields();$('n').value='';calc();paintEdit();$('err').textContent='';$('n').focus()}
+async function findEntry(peId,crewId){
+  let r=ENTRIES.find(x=>x.special_stage_id===peId&&x.crew_id===crewId);
+  if(!r&&navigator.onLine){
+    const {data}=await sb.from('time_entries').select('*').eq('special_stage_id',peId).eq('crew_id',crewId).maybeSingle();r=data||null}
+  return r;
+}
+// Al elegir auto + PE (o al tocar Editar): si ya hay tiempo cargado, se precarga. Si ya escribiste datos nuevos, solo avisa que reemplazará.
+async function checkExisting(force){
+  const tok=++chkTok,c=BYNUM[$('n').value.trim()],pe=$('pe').value;
+  if(EDIT){clearFields();EDIT=null;calc()}
+  paintEdit();
+  if(!c||!pe)return;
+  const r=await findEntry(pe,c.id);
+  if(tok!==chkTok||!r)return;
+  if(force||fieldsEmpty()){EDIT=r;fillFrom(r);paintEdit()}
+  else{const b=$('edit');b.style.display='';b.innerHTML=`Atención: este auto ya tiene tiempo cargado en esta PE (<strong>${r.status==='dnf'?'DNF':fmt(r.net_cs)}</strong>). Si guardás, lo <strong>reemplaza</strong>.`}
+}
+$('n').addEventListener('change',()=>checkExisting(false));
+$('pe').addEventListener('change',()=>checkExisting(false));
+$('log').onclick=async e=>{
+  const ed=e.target.closest('[data-ed]');
+  if(ed){const r=ENTRIES.find(x=>x.id===ed.dataset.ed);if(!r)return;
+    $('pe').value=r.special_stage_id;$('n').value=state.crews.get(r.crew_id)?.car_number??'';
+    $('ok').textContent='';await checkExisting(true);scrollTo({top:0,behavior:'smooth'});return}
+  const b=e.target.closest('[data-v]');if(!b)return;
   const {error}=await validateEntry(b.dataset.v,b.dataset.on==='true');
   if(error)$('err').textContent=error.message;else refresh()};
 
@@ -271,7 +330,7 @@ $('save').onclick=async()=>{
     if(!isNet(e)){$('err').textContent=e.message;return}
     Q.push(entry);saveQ();qlabel();setOnline(false);note='Sin conexión: el tiempo quedó guardado en este dispositivo y se enviará al sincronizar.';
   }
-  ['n','s','e','p','det'].forEach(id=>$(id).value='');$('mot').value='';$('dnf').checked=false;calc();
+  ['n','s','e','p','det'].forEach(id=>$(id).value='');$('mot').value='';$('dnf').checked=false;EDIT=null;chkTok++;paintEdit();calc();
   $('err').textContent=note;$('ok').textContent=ok;
   if(navigator.onLine)await refresh();else draw();$('n').focus();
 };

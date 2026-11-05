@@ -102,8 +102,8 @@ td,th{padding:.5rem .45rem}td{font-size:.95rem}.tot{font-size:1.2rem}
 </div>
 
 <main class="max-w-[1600px] mx-auto px-4 py-5">
-  <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
-    <div role="tablist" class="tabs" aria-label="Vista">
+  <div class="flex items-center justify-between gap-3 mb-3">
+    <div role="tablist" class="tabs min-w-0" aria-label="Vista">
       <button class="tab ttl" role="tab" data-v="gen" aria-selected="true">General</button>
       <button class="tab ttl" role="tab" data-v="cat" aria-selected="false">Por categoría</button>
       <button class="tab ttl" role="tab" data-v="e1" aria-selected="false">Etapa 1</button>
@@ -112,14 +112,16 @@ td,th{padding:.5rem .45rem}td{font-size:.95rem}.tot{font-size:1.2rem}
       <button class="tab ttl" role="tab" data-v="pen" aria-selected="false">Penalizaciones</button>
       <button class="tab ttl" role="tab" data-v="insc" aria-selected="false">Inscriptos</button>
     </div>
-    <button id="pdf" class="pdfbtn" type="button" title="Descargar esta vista en PDF">Descargar PDF</button>
-    <div class="text-sm leading-tight text-right" aria-live="polite">
+    <button id="pdf" class="pdfbtn shrink-0" type="button" title="Descargar esta vista en PDF">Descargar PDF</button>
+  </div>
+  <div id="pebar" hidden aria-label="Resumen por PE"></div>
+  <div class="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 mb-4">
+    <div id="chips" class="flex flex-wrap gap-3.5" aria-label="Filtro por categoría"></div>
+    <div class="text-sm leading-tight text-right shrink-0 ml-auto" aria-live="polite">
       <div class="flex items-center justify-end gap-2 font-semibold text-white"><span class="dot"></span><span>En vivo</span></div>
       <div class="mt-1" style="color:var(--mu)">Última actualización: <b id="upd" class="text-white">--:--:--</b></div>
     </div>
   </div>
-  <div id="pebar" hidden aria-label="Resumen por PE"></div>
-  <div id="chips" class="flex flex-wrap gap-3.5 mb-4" aria-label="Filtro por categoría"></div>
   <p id="note" class="text-sm mb-3" style="color:var(--mu)"></p>
   <div id="fin" class="fgrid" hidden></div>
   <div id="tw" class="overflow-x-auto rounded-lg" style="border:1px solid var(--line)"><table id="tbl"></table></div>
